@@ -19,11 +19,21 @@ class AuthenticatorTest extends TestCase
     {
         // Arrange
         $client = $this->createSuccessFronteggCurlHttpClientStub();
-        $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
+        $authenticator = $this->createFronteggAuthenticator(
+            $client,
+            'clientTestID',
+            'apiTestSecretKey'
+        );
 
         // Assert
-        $this->assertEquals( 'clientTestID', $authenticator->getConfig()->getClientId());
-        $this->assertEquals('apiTestSecretKey', $authenticator->getConfig()->getClientSecret());
+        $this->assertEquals(
+            'clientTestID',
+            $authenticator->getConfig()->getClientId()
+        );
+        $this->assertEquals(
+            'apiTestSecretKey',
+            $authenticator->getConfig()->getClientSecret()
+        );
     }
 
     /**
@@ -33,7 +43,11 @@ class AuthenticatorTest extends TestCase
     {
         // Arrange
         $client = $this->createSuccessFronteggCurlHttpClientStub();
-        $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
+        $authenticator = $this->createFronteggAuthenticator(
+            $client,
+            'clientTestID',
+            'apiTestSecretKey'
+        );
 
         // Act
         $authenticator->authenticate();
@@ -54,8 +68,15 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationGetsExpiredToken(): void
     {
         // Arrange
-        $client = $this->createSuccessFronteggCurlHttpClientStub('test token', 0);
-        $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
+        $client = $this->createSuccessFronteggCurlHttpClientStub(
+            'test token',
+            0
+        );
+        $authenticator = $this->createFronteggAuthenticator(
+            $client,
+            'clientTestID',
+            'apiTestSecretKey'
+        );
 
         // Act
         $authenticator->authenticate();
@@ -78,15 +99,25 @@ class AuthenticatorTest extends TestCase
     {
         // Arrange
         $client = $this->createFailureFronteggCurlHttpClientStub();
-        $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
+        $authenticator = $this->createFronteggAuthenticator(
+            $client,
+            'clientTestID',
+            'apiTestSecretKey'
+        );
 
         // Act
         $authenticator->authenticate();
 
         // Assert
-        $this->assertEquals(401, $authenticator->getLastResponse()->getHttpResponseCode());
+        $this->assertEquals(
+            401,
+            $authenticator->getLastResponse()->getHttpResponseCode()
+        );
         $this->assertNull($authenticator->getAccessToken());
-        $this->assertEquals('Unauthorized', $authenticator->getApiError()->getError());
+        $this->assertEquals(
+            'Unauthorized',
+            $authenticator->getApiError()->getError()
+        );
     }
 
     /**
@@ -95,7 +126,8 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationValidationIsWorking(): void
     {
         // Arrange
-        $client = $this->createSuccessFronteggCurlHttpClientStubForAuthValidation();
+        $client
+            = $this->createSuccessFronteggCurlHttpClientStubForAuthValidation();
         $authenticator = $this->createFronteggAuthenticator(
             $client,
             'clientTestID',
@@ -137,17 +169,23 @@ class AuthenticatorTest extends TestCase
         $authenticator->validateAuthentication();
 
         // Assert
-        $this->assertEquals(401, $authenticator->getLastResponse()->getHttpResponseCode());
+        $this->assertEquals(
+            401,
+            $authenticator->getLastResponse()->getHttpResponseCode()
+        );
         $this->assertNull($authenticator->getAccessToken());
-        $this->assertEquals('Unauthorized', $authenticator->getApiError()->getError());
+        $this->assertEquals(
+            'Unauthorized',
+            $authenticator->getApiError()->getError()
+        );
     }
 
     /**
      * @param FronteggCurlHttpClient $client
-     * @param string $clientId
-     * @param string $clientSecret
-     * @param string $baseUrl
-     * @param array $urls
+     * @param string                 $clientId
+     * @param string                 $clientSecret
+     * @param string                 $baseUrl
+     * @param array                  $urls
      *
      * @return Authenticator
      */
@@ -177,14 +215,20 @@ class AuthenticatorTest extends TestCase
     ): Stub {
         $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
-            ->willReturn(new ApiRawResponse(
-                [],
-                sprintf('{
+            ->willReturn(
+                new ApiRawResponse(
+                    [],
+                    sprintf(
+                        '{
                     "token": "%s",
                     "expiresIn": %d
-                }', $accessToken, $expiresIn),
-                $httpStatusCode
-            ));
+                }',
+                        $accessToken,
+                        $expiresIn
+                    ),
+                    $httpStatusCode
+                )
+            );
 
         return $client;
     }
@@ -205,15 +249,22 @@ class AuthenticatorTest extends TestCase
     ): Stub {
         $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
-            ->willReturn(new ApiRawResponse(
-                [],
-                sprintf('{
+            ->willReturn(
+                new ApiRawResponse(
+                    [],
+                    sprintf(
+                        '{
                     "statusCode": %s,
                     "error": "%s",
                     "message": "%s"
-                }', $statusCode, $error, $message),
-                $httpStatusCode
-            ));
+                }',
+                        $statusCode,
+                        $error,
+                        $message
+                    ),
+                    $httpStatusCode
+                )
+            );
 
         return $client;
     }
@@ -233,18 +284,25 @@ class AuthenticatorTest extends TestCase
             ->willReturnOnConsecutiveCalls(
                 new ApiRawResponse(
                     [],
-                    sprintf('{
+                    sprintf(
+                        '{
                         "token": "%s",
                         "expiresIn": 0
-                    }', $accessToken),
+                    }',
+                        $accessToken
+                    ),
                     200
                 ),
                 new ApiRawResponse(
                     [],
-                    sprintf('{
+                    sprintf(
+                        '{
                         "token": "%s",
                         "expiresIn": %d
-                    }', $accessToken, $expiresInForValidation),
+                    }',
+                        $accessToken,
+                        $expiresInForValidation
+                    ),
                     200
                 )
             );
@@ -279,11 +337,16 @@ class AuthenticatorTest extends TestCase
                 ),
                 new ApiRawResponse(
                     [],
-                    sprintf('{
+                    sprintf(
+                        '{
                         "statusCode": %s,
                         "error": "%s",
                         "message": "%s"
-                    }', $statusCode, $error, $message),
+                    }',
+                        $statusCode,
+                        $error,
+                        $message
+                    ),
                     $httpStatusCode
                 )
             );

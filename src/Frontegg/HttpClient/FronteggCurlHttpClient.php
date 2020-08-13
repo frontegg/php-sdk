@@ -23,17 +23,21 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
     protected $curlErrorCode = 0;
 
     /**
-     * @var string|boolean The raw response from the server
+     * The raw response from the server
+     *
+     * @var string|boolean
      */
     protected $rawResponse;
 
     /**
-     * @var FronteggCurl Procedural curl as object
+     * Procedural curl as object
+     *
+     * @var FronteggCurl
      */
     protected $fronteggCurl;
 
     /**
-     * @param FronteggCurl|null Procedural curl as object
+     * @param FronteggCurl|null $fronteggCurl
      */
     public function __construct(FronteggCurl $fronteggCurl = null)
     {
@@ -43,7 +47,7 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
     /**
      * @inheritdoc
      */
-    public function send($url, $method, $body, array $headers, $timeOut): ApiRawResponse
+    public function send(string $url, string $method, string $body, array $headers, int $timeOut): ApiRawResponse
     {
         $this->openConnection($url, $method, $body, $headers, $timeOut);
         $this->sendRequest();
@@ -69,7 +73,7 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
      * @param array  $headers The request headers.
      * @param int    $timeOut The timeout in seconds for the request.
      */
-    public function openConnection($url, $method, $body, array $headers, $timeOut)
+    public function openConnection(string $url, string $method, string $body, array $headers, int $timeOut)
     {
         $options = [
             CURLOPT_CUSTOMREQUEST => $method,

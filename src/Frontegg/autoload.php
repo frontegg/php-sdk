@@ -20,7 +20,7 @@ if (version_compare(PHP_VERSION, '7.3.0', '<')) {
  *
  * @return void
  */
-spl_autoload_register(function ($class) {
+spl_autoload_register(function (string $class): void {
     // project-specific namespace prefix
     $prefix = 'Frontegg\\';
 

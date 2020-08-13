@@ -31,8 +31,11 @@ class ApiError
      * @param string $message
      * @param int    $statusCode
      */
-    public function __construct(string $error, string $message, int $statusCode = null)
-    {
+    public function __construct(
+        string $error,
+        string $message,
+        int $statusCode = null
+    ) {
         $this->statusCode = $statusCode;
         $this->error = $error;
         $this->message = $message;

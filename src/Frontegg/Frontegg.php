@@ -72,10 +72,16 @@ class Frontegg
         ], $config);
 
         if (!$config['clientId']) {
-            throw new FronteggSDKException('Required "clientId" key not supplied in config and could not find fallback environment variable "' . static::CLIENT_ID_ENV_NAME . '"');
+            throw new FronteggSDKException(
+                'Required "clientId" key not supplied in config and
+                could not find fallback environment variable "' . static::CLIENT_ID_ENV_NAME . '"'
+            );
         }
         if (!$config['clientSecret']) {
-            throw new FronteggSDKException('Required "clientSecret" key not supplied in config and could not find fallback environment variable "' . static::CLIENT_SECRET_ENV_NAME . '"');
+            throw new FronteggSDKException(
+                'Required "clientSecret" key not supplied in config and
+                could not find fallback environment variable "' . static::CLIENT_SECRET_ENV_NAME . '"'
+            );
         }
 
         $this->config = new Config(

@@ -20,9 +20,10 @@ class Config
      *
      * @var string[]
      */
-    protected static $API_URL_KEYS = [
-        self::SERVICE_AUTHENTICATION => self::SERVICE_AUTHENTICATION_DEFAULT_URL,
-    ];
+    protected static $API_URL_KEYS
+        = [
+            self::SERVICE_AUTHENTICATION => self::SERVICE_AUTHENTICATION_DEFAULT_URL,
+        ];
 
     /**
      * Client ID.
@@ -108,14 +109,16 @@ class Config
     public function getServiceUrl(string $urlKey): string
     {
         if (!isset(static::$API_URL_KEYS[$urlKey])) {
-            throw new InvalidUrlConfigException(sprintf('URL "%s" is not a part of allowed API', $urlKey));
+            throw new InvalidUrlConfigException(
+                sprintf('URL "%s" is not a part of allowed API', $urlKey)
+            );
         }
 
         if (isset($this->urls[$urlKey])) {
-            return $this->baseUrl . $this->urls[$urlKey];
+            return $this->baseUrl.$this->urls[$urlKey];
         }
 
-        return $this->baseUrl . static::$API_URL_KEYS[$urlKey];
+        return $this->baseUrl.static::$API_URL_KEYS[$urlKey];
     }
 
     /**

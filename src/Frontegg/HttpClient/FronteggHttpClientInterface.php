@@ -24,5 +24,5 @@ interface FronteggHttpClientInterface
      *
      * @throws \Frontegg\Exception\FronteggSDKException
      */
-    public function send($url, $method, $body, array $headers, $timeOut): ApiRawResponse;
+    public function send(string $url, string $method, string $body, array $headers, int $timeOut): ApiRawResponse;
 }

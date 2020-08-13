@@ -1,6 +1,6 @@
 <?php
 
-namespace Frontegg\Tests\Error;
+namespace Frontegg\Tests\Authenticator;
 
 use Frontegg\Authenticator\ApiError;
 use PHPUnit\Framework\TestCase;
@@ -18,6 +18,9 @@ class ErrorTest extends TestCase
         // Assert
         $this->assertEquals(401, $apiError->getStatusCode());
         $this->assertEquals('Test error', $apiError->getError());
-        $this->assertEquals('Error message with details', $apiError->getMessage());
+        $this->assertEquals(
+            'Error message with details',
+            $apiError->getMessage()
+        );
     }
 }

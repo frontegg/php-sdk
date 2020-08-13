@@ -19,8 +19,10 @@ class FronteggCurl
 
     /**
      * Make a new curl reference instance
+     *
+     * @return void
      */
-    public function init()
+    public function init(): void
     {
         $this->curl = curl_init();
     }
@@ -28,10 +30,12 @@ class FronteggCurl
     /**
      * Set a curl option
      *
-     * @param $key
-     * @param $value
+     * @param int $key
+     * @param mixed $value
+     *
+     * @return void
      */
-    public function setopt($key, $value)
+    public function setopt(int $key, $value): void
     {
         curl_setopt($this->curl, $key, $value);
     }
@@ -40,8 +44,10 @@ class FronteggCurl
      * Set an array of options to a curl resource
      *
      * @param array $options
+     *
+     * @return void
      */
-    public function setoptArray(array $options)
+    public function setoptArray(array $options): void
     {
         curl_setopt_array($this->curl, $options);
     }
@@ -61,7 +67,7 @@ class FronteggCurl
      *
      * @return int
      */
-    public function errno()
+    public function errno(): int
     {
         return curl_errno($this->curl);
     }
@@ -71,7 +77,7 @@ class FronteggCurl
      *
      * @return string
      */
-    public function error()
+    public function error(): string
     {
         return curl_error($this->curl);
     }
@@ -79,11 +85,11 @@ class FronteggCurl
     /**
      * Get info from a curl reference
      *
-     * @param $type
+     * @param int $type
      *
      * @return mixed
      */
-    public function getinfo($type)
+    public function getinfo(int $type)
     {
         return curl_getinfo($this->curl, $type);
     }
@@ -93,15 +99,17 @@ class FronteggCurl
      *
      * @return array
      */
-    public function version()
+    public function version(): array
     {
         return curl_version();
     }
 
     /**
      * Close the resource connection to curl
+     *
+     * @return void
      */
-    public function close()
+    public function close(): void
     {
         curl_close($this->curl);
     }

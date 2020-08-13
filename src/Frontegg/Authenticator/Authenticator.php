@@ -96,11 +96,15 @@ class Authenticator
      */
     public function authenticate(): void
     {
-        $url = $this->fronteggConfig->getServiceUrl(Config::SERVICE_AUTHENTICATION);
-        $body = json_encode([
-            'clientId' => $this->fronteggConfig->getClientId(),
-            'secret' => $this->fronteggConfig->getClientSecret(),
-        ]);
+        $url = $this->fronteggConfig->getServiceUrl(
+            Config::SERVICE_AUTHENTICATION
+        );
+        $body = json_encode(
+            [
+                'clientId' => $this->fronteggConfig->getClientId(),
+                'secret' => $this->fronteggConfig->getClientSecret(),
+            ]
+        );
 
         $this->lastResponse = $this->client->send(
             $url,
@@ -142,7 +146,9 @@ class Authenticator
      */
     protected function setAccessTokenFromResponseData(): void
     {
-        $responseBodyDecoded = $this->getDecodedJsonData($this->lastResponse->getBody());
+        $responseBodyDecoded = $this->getDecodedJsonData(
+            $this->lastResponse->getBody()
+        );
 
         if (!$responseBodyDecoded
             || !isset($responseBodyDecoded['token'])
@@ -158,8 +164,13 @@ class Authenticator
             return;
         }
 
-        $expiresAt = new DateTime(sprintf('+%d seconds', $responseBodyDecoded['expiresIn']));
-        $this->accessToken = new AccessToken($responseBodyDecoded['token'], $expiresAt);
+        $expiresAt = new DateTime(
+            sprintf('+%d seconds', $responseBodyDecoded['expiresIn'])
+        );
+        $this->accessToken = new AccessToken(
+            $responseBodyDecoded['token'],
+            $expiresAt
+        );
         $this->apiError = null;
     }
 
@@ -171,7 +182,9 @@ class Authenticator
      */
     protected function setErrorFromResponseData(): void
     {
-        $errorDecoded = $this->getDecodedJsonData($this->lastResponse->getBody());
+        $errorDecoded = $this->getDecodedJsonData(
+            $this->lastResponse->getBody()
+        );
 
         $this->apiError = new ApiError(
             $errorDecoded['error'] ?? '',
@@ -191,7 +204,10 @@ class Authenticator
     protected function getDecodedJsonData(?string $jsonData): ?array
     {
         if (empty($jsonData)) {
-            $this->apiError = new ApiError('Invalid JSON', 'An empty string can\'t be parsed as valid JSON.');
+            $this->apiError = new ApiError(
+                'Invalid JSON',
+                'An empty string can\'t be parsed as valid JSON.'
+            );
             $this->accessToken = null;
 
             return null;

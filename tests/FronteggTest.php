@@ -29,11 +29,23 @@ class FronteggTest extends TestCase
         $frontegg = new Frontegg($config);
 
         // Assert
-        $this->assertInstanceOf(Authenticator::class, $frontegg->getAuthenticator());
+        $this->assertInstanceOf(
+            Authenticator::class,
+            $frontegg->getAuthenticator()
+        );
         $this->assertInstanceOf(Config::class, $frontegg->getConfig());
-        $this->assertEquals('clientTestID', $frontegg->getConfig()->getClientId());
-        $this->assertEquals('apiTestSecretKey', $frontegg->getConfig()->getClientSecret());
-        $this->assertInstanceOf(FronteggHttpClientInterface::class, $frontegg->getClient());
+        $this->assertEquals(
+            'clientTestID',
+            $frontegg->getConfig()->getClientId()
+        );
+        $this->assertEquals(
+            'apiTestSecretKey',
+            $frontegg->getConfig()->getClientSecret()
+        );
+        $this->assertInstanceOf(
+            FronteggHttpClientInterface::class,
+            $frontegg->getClient()
+        );
     }
 
     /**
@@ -56,7 +68,10 @@ class FronteggTest extends TestCase
         $frontegg->init();
 
         // Assert
-        $this->assertInstanceOf(Authenticator::class, $frontegg->getAuthenticator());
+        $this->assertInstanceOf(
+            Authenticator::class,
+            $frontegg->getAuthenticator()
+        );
         $this->assertInstanceOf(
             AccessToken::class,
             $frontegg->getAuthenticator()->getAccessToken()
@@ -77,14 +92,20 @@ class FronteggTest extends TestCase
     ): Stub {
         $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
-            ->willReturn(new ApiRawResponse(
-                [],
-                sprintf('{
+            ->willReturn(
+                new ApiRawResponse(
+                    [],
+                    sprintf(
+                        '{
                     "token": "%s",
                     "expiresIn": %d
-                }', $accessToken, $expiresIn),
-                $httpStatusCode
-            ));
+                }',
+                        $accessToken,
+                        $expiresIn
+                    ),
+                    $httpStatusCode
+                )
+            );
 
         return $client;
     }
