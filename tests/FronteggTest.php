@@ -7,7 +7,7 @@ use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Frontegg;
 use Frontegg\Http\ApiRawResponse;
-use Frontegg\HttpClient\FronteggGuzzleHttpClient;
+use Frontegg\HttpClient\FronteggCurlHttpClient;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +44,7 @@ class FronteggTest extends TestCase
     public function testFronteggInitialized(): void
     {
         // Arrange
-        $httpClient = $this->createSuccessFronteggGuzzleHttpClientStub();
+        $httpClient = $this->createSuccessFronteggCurlHttpClientStub();
         $config = [
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
@@ -68,14 +68,14 @@ class FronteggTest extends TestCase
      * @param int    $expiresIn Seconds to token expiration
      * @param int    $httpStatusCode
      *
-     * @return Stub|FronteggGuzzleHttpClient
+     * @return Stub|FronteggCurlHttpClient
      */
-    protected function createSuccessFronteggGuzzleHttpClientStub(
+    protected function createSuccessFronteggCurlHttpClientStub(
         string $accessToken = 'YOUR-JWT-TOKEN',
         int $expiresIn = 1800,
         int $httpStatusCode = 200
     ): Stub {
-        $client = $this->createStub(FronteggGuzzleHttpClient::class);
+        $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
             ->willReturn(new ApiRawResponse(
                 [],

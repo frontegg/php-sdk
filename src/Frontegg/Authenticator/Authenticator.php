@@ -11,6 +11,11 @@ use JsonException;
 class Authenticator
 {
     /**
+     * @const HTTP client request waiting timeout in seconds.
+     */
+    public const HTTP_REQUEST_TIMEOUT = 10;
+
+    /**
      * Frontegg configuration.
      *
      * @var Config
@@ -33,10 +38,9 @@ class Authenticator
     protected $lastResponse;
 
     /**
-     * @var array|null
-     * @todo: Refactor this into separate class.
+     * @var ApiError|null
      */
-    protected $error;
+    protected $apiError;
 
     /**
      * Authenticator constructor.
@@ -77,11 +81,11 @@ class Authenticator
     }
 
     /**
-     * @return array|null
+     * @return ApiError|null
      */
-    public function getError(): ?array
+    public function getApiError(): ?ApiError
     {
-        return $this->error;
+        return $this->apiError;
     }
 
     /**
@@ -95,17 +99,15 @@ class Authenticator
         $url = $this->fronteggConfig->getServiceUrl(Config::SERVICE_AUTHENTICATION);
         $body = json_encode([
             'clientId' => $this->fronteggConfig->getClientId(),
-            'clientSecret' => $this->fronteggConfig->getClientSecret(),
+            'secret' => $this->fronteggConfig->getClientSecret(),
         ]);
 
         $this->lastResponse = $this->client->send(
             $url,
             'POST',
             $body,
-            [
-                'Content-type: application/json',
-            ],
-            10
+            ['Content-Type' => 'application/json'],
+            static::HTTP_REQUEST_TIMEOUT
         );
 
         if (200 !== $this->lastResponse->getHttpResponseCode()) {
@@ -136,29 +138,21 @@ class Authenticator
      * Sets access token from the last response data.
      * Sets error to null.
      *
-     * @todo Refactor this.
-     *
      * @return void
      */
     protected function setAccessTokenFromResponseData(): void
     {
-        if (empty($this->lastResponse->getBody())) {
-            $this->error = [
-                'error' => 'Invalid JSON',
-                'message' => 'An empty string can\'t be parsed as valid JSON.',
-            ];
-            $this->accessToken = null;
+        $responseBodyDecoded = $this->getDecodedJsonData($this->lastResponse->getBody());
 
-            return;
-        }
-
-        try {
-            $responseBodyDecoded = json_decode($this->lastResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            $this->error = [
-                'error' => 'Invalid JSON',
-                'message' => $e->getMessage(),
-            ];
+        if (!$responseBodyDecoded
+            || !isset($responseBodyDecoded['token'])
+            || !isset($responseBodyDecoded['expiresIn'])
+        ) {
+            $this->apiError = new ApiError(
+                'Bad credentials',
+                'Invalid token or expires in value.',
+                null,
+            );
             $this->accessToken = null;
 
             return;
@@ -166,41 +160,50 @@ class Authenticator
 
         $expiresAt = new DateTime(sprintf('+%d seconds', $responseBodyDecoded['expiresIn']));
         $this->accessToken = new AccessToken($responseBodyDecoded['token'], $expiresAt);
-        $this->error = null;
+        $this->apiError = null;
     }
 
     /**
      * Sets an error data from response data.
      * Sets access token to null.
      *
-     * @todo Refactor this.
-     *
      * @return void
      */
     protected function setErrorFromResponseData(): void
     {
-        if (empty($this->lastResponse->getBody())) {
-            $this->error = [
-                'error' => 'Invalid JSON',
-                'message' => 'An empty string can\'t be parsed as valid JSON.',
-            ];
+        $errorDecoded = $this->getDecodedJsonData($this->lastResponse->getBody());
+
+        $this->apiError = new ApiError(
+            $errorDecoded['error'] ?? '',
+            $errorDecoded['message'] ?? '',
+            $errorDecoded['statusCode'] ?? null,
+        );
+        $this->accessToken = null;
+    }
+
+    /**
+     * Returns JSON data decoded into array.
+     *
+     * @param string|null $jsonData
+     *
+     * @return array|null
+     */
+    protected function getDecodedJsonData(?string $jsonData): ?array
+    {
+        if (empty($jsonData)) {
+            $this->apiError = new ApiError('Invalid JSON', 'An empty string can\'t be parsed as valid JSON.');
             $this->accessToken = null;
 
-            return;
+            return null;
         }
 
         try {
-            $this->error = json_decode($this->lastResponse->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            return json_decode($jsonData, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            $this->error = [
-                'error' => 'Invalid JSON',
-                'message' => $e->getMessage(),
-            ];
+            $this->apiError = new ApiError('Invalid JSON', $e->getMessage());
             $this->accessToken = null;
-
-            return;
         }
 
-        $this->accessToken = null;
+        return null;
     }
 }

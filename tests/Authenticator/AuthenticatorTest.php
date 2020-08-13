@@ -6,7 +6,7 @@ use DateTime;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Http\ApiRawResponse;
-use Frontegg\HttpClient\FronteggGuzzleHttpClient;
+use Frontegg\HttpClient\FronteggCurlHttpClient;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
@@ -18,7 +18,7 @@ class AuthenticatorTest extends TestCase
     public function testClientCredentialsAreSet(): void
     {
         // Arrange
-        $client = $this->createSuccessFronteggGuzzleHttpClientStub();
+        $client = $this->createSuccessFronteggCurlHttpClientStub();
         $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
 
         // Assert
@@ -32,7 +32,7 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationIsWorking(): void
     {
         // Arrange
-        $client = $this->createSuccessFronteggGuzzleHttpClientStub();
+        $client = $this->createSuccessFronteggCurlHttpClientStub();
         $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
 
         // Act
@@ -54,7 +54,7 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationGetsExpiredToken(): void
     {
         // Arrange
-        $client = $this->createSuccessFronteggGuzzleHttpClientStub('test token', 0);
+        $client = $this->createSuccessFronteggCurlHttpClientStub('test token', 0);
         $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
 
         // Act
@@ -77,7 +77,7 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationIsNotWorking(): void
     {
         // Arrange
-        $client = $this->createFailureFronteggGuzzleHttpClientStub();
+        $client = $this->createFailureFronteggCurlHttpClientStub();
         $authenticator = $this->createFronteggAuthenticator($client, 'clientTestID', 'apiTestSecretKey');
 
         // Act
@@ -86,7 +86,7 @@ class AuthenticatorTest extends TestCase
         // Assert
         $this->assertEquals(401, $authenticator->getLastResponse()->getHttpResponseCode());
         $this->assertNull($authenticator->getAccessToken());
-        $this->assertEquals('Unauthorized', $authenticator->getError()['error']);
+        $this->assertEquals('Unauthorized', $authenticator->getApiError()->getError());
     }
 
     /**
@@ -95,7 +95,7 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationValidationIsWorking(): void
     {
         // Arrange
-        $client = $this->createSuccessFronteggGuzzleHttpClientStubForAuthValidation();
+        $client = $this->createSuccessFronteggCurlHttpClientStubForAuthValidation();
         $authenticator = $this->createFronteggAuthenticator(
             $client,
             'clientTestID',
@@ -122,7 +122,7 @@ class AuthenticatorTest extends TestCase
     public function testAuthenticationValidationIsNotWorking(): void
     {
         // Arrange
-        $client = $this->createFailureFronteggGuzzleHttpClientStubForAuthValidation(
+        $client = $this->createFailureFronteggCurlHttpClientStubForAuthValidation(
             401,
             'Unauthorized'
         );
@@ -139,11 +139,11 @@ class AuthenticatorTest extends TestCase
         // Assert
         $this->assertEquals(401, $authenticator->getLastResponse()->getHttpResponseCode());
         $this->assertNull($authenticator->getAccessToken());
-        $this->assertEquals('Unauthorized', $authenticator->getError()['error']);
+        $this->assertEquals('Unauthorized', $authenticator->getApiError()->getError());
     }
 
     /**
-     * @param FronteggGuzzleHttpClient $client
+     * @param FronteggCurlHttpClient $client
      * @param string $clientId
      * @param string $clientSecret
      * @param string $baseUrl
@@ -152,7 +152,7 @@ class AuthenticatorTest extends TestCase
      * @return Authenticator
      */
     protected function createFronteggAuthenticator(
-        FronteggGuzzleHttpClient $client,
+        FronteggCurlHttpClient $client,
         string $clientId,
         string $clientSecret,
         string $baseUrl = 'http://test',
@@ -168,14 +168,14 @@ class AuthenticatorTest extends TestCase
      * @param int    $expiresIn Seconds to token expiration
      * @param int    $httpStatusCode
      *
-     * @return Stub|FronteggGuzzleHttpClient
+     * @return Stub|FronteggCurlHttpClient
      */
-    protected function createSuccessFronteggGuzzleHttpClientStub(
+    protected function createSuccessFronteggCurlHttpClientStub(
         string $accessToken = 'YOUR-JWT-TOKEN',
         int $expiresIn = 1800,
         int $httpStatusCode = 200
     ): Stub {
-        $client = $this->createStub(FronteggGuzzleHttpClient::class);
+        $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
             ->willReturn(new ApiRawResponse(
                 [],
@@ -195,15 +195,15 @@ class AuthenticatorTest extends TestCase
      * @param string $message
      * @param int    $httpStatusCode
      *
-     * @return Stub|FronteggGuzzleHttpClient
+     * @return Stub|FronteggCurlHttpClient
      */
-    protected function createFailureFronteggGuzzleHttpClientStub(
+    protected function createFailureFronteggCurlHttpClientStub(
         int $statusCode = 401,
         string $error = 'Unauthorized',
         string $message = 'Could not verify vendor',
         int $httpStatusCode = 401
     ): Stub {
-        $client = $this->createStub(FronteggGuzzleHttpClient::class);
+        $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
             ->willReturn(new ApiRawResponse(
                 [],
@@ -222,13 +222,13 @@ class AuthenticatorTest extends TestCase
      * @param string $accessToken
      * @param int    $expiresInForValidation Seconds to token expiration.
      *
-     * @return Stub|FronteggGuzzleHttpClient
+     * @return Stub|FronteggCurlHttpClient
      */
-    protected function createSuccessFronteggGuzzleHttpClientStubForAuthValidation(
+    protected function createSuccessFronteggCurlHttpClientStubForAuthValidation(
         string $accessToken = 'YOUR-JWT-TOKEN',
         int $expiresInForValidation = 1800
     ): Stub {
-        $client = $this->createStub(FronteggGuzzleHttpClient::class);
+        $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
             ->willReturnOnConsecutiveCalls(
                 new ApiRawResponse(
@@ -258,15 +258,15 @@ class AuthenticatorTest extends TestCase
      * @param string $message
      * @param int    $httpStatusCode
      *
-     * @return Stub|FronteggGuzzleHttpClient
+     * @return Stub|FronteggCurlHttpClient
      */
-    protected function createFailureFronteggGuzzleHttpClientStubForAuthValidation(
+    protected function createFailureFronteggCurlHttpClientStubForAuthValidation(
         int $statusCode = 401,
         string $error = 'Unauthorized',
         string $message = 'Could not verify vendor',
         int $httpStatusCode = 401
     ): Stub {
-        $client = $this->createStub(FronteggGuzzleHttpClient::class);
+        $client = $this->createStub(FronteggCurlHttpClient::class);
         $client->method('send')
             ->willReturnOnConsecutiveCalls(
                 new ApiRawResponse(

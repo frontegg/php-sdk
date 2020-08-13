@@ -5,6 +5,7 @@ namespace Frontegg;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Exception\FronteggSDKException;
+use Frontegg\HttpClient\FronteggCurlHttpClient;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use Frontegg\HttpClient\HttpClientFactory;
 
@@ -83,10 +84,10 @@ class Frontegg
             $config['apiBaseUrl'],
             $config['apiUrls']
         );
-        $this->client = HttpClientFactory::createHttpClient($config['httpClientHandler']);
+        $this->client = $config['httpClientHandler'] ?? new FronteggCurlHttpClient();
 
         $this->authenticator = new Authenticator($this->config, $this->client);
-        // @TODO: Instanciate
+        // @TODO: Instantiate Audits, Events, Middleware
     }
 
     /**
