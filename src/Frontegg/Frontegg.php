@@ -2,19 +2,22 @@
 
 namespace Frontegg;
 
+use Frontegg\Audits\AuditsClient;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
+use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
+use Frontegg\Exception\InvalidParameterException;
+use Frontegg\Exception\InvalidUrlConfigException;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
-use Frontegg\HttpClient\HttpClientFactory;
 
 class Frontegg
 {
     /**
      * @const string Version number of the Frontegg PHP SDK.
      */
-    const VERSION = '0.1.0';
+    const VERSION = '0.2.0';
 
     /**
      * @const string Default API version for requests.
@@ -37,13 +40,6 @@ class Frontegg
     const DEFAULT_API_BASE_URL = 'https://api.frontegg.com';
 
     /**
-     * Frontegg authenticator instance.
-     *
-     * @var Authenticator
-     */
-    protected $authenticator;
-
-    /**
      * @var FronteggHttpClientInterface
      */
     protected $client;
@@ -52,6 +48,20 @@ class Frontegg
      * @var Config
      */
     protected $config;
+
+    /**
+     * Frontegg authenticator instance.
+     *
+     * @var Authenticator
+     */
+    protected $authenticator;
+
+    /**
+     * Frontegg audits client instance.
+     *
+     * @var AuditsClient
+     */
+    protected $auditsClient;
 
     /**
      * Frontegg constructor.
@@ -93,7 +103,8 @@ class Frontegg
         $this->client = $config['httpClientHandler'] ?? new FronteggCurlHttpClient();
 
         $this->authenticator = new Authenticator($this->config, $this->client);
-        // @TODO: Instantiate Audits, Events, Middleware
+        $this->auditsClient = new AuditsClient($this->authenticator);
+        // @TODO: Instantiate Events, Middleware
     }
 
     /**
@@ -128,5 +139,63 @@ class Frontegg
     public function init(): void
     {
         $this->authenticator->authenticate();
+    }
+
+    /**
+     * Retrieves filtered and sorted audits data collection.
+     *
+     * @param string      $tenantId
+     * @param string      $filter
+     * @param int         $offset
+     * @param int|null    $count
+     * @param string|null $sortBy
+     * @param string      $sortDirection
+     * @param mixed       $filters         Dynamic query params based on the metadata
+     *
+     * @throws Exception\AuthenticationException
+     * @return array
+     */
+    public function getAudits(
+        string $tenantId,
+        string $filter = '',
+        int $offset = 0,
+        ?int $count = null,
+        ?string $sortBy = null,
+        string $sortDirection = 'ASC',
+        ... $filters
+    ): array {
+        return $this->auditsClient->getAudits(
+            $tenantId,
+            $filter,
+            $offset,
+            $count,
+            $sortBy,
+            $sortDirection,
+            ... $filters
+        );
+    }
+
+    /**
+     * Sends audit log data into the Frontegg system.
+     * Returns created audit log data.
+     *
+     * @param string $tenantId
+     * @param array  $auditLog Audits parameters:
+     *                           user: string - User email
+     *                           resource: string - Source of log event
+     *                           action: string - Log event name
+     *                           severity: string (required) - Log level
+     *                           ip: string - User IP
+     *
+     * @throws AuthenticationException
+     * @throws FronteggSDKException
+     * @throws InvalidParameterException
+     * @throws InvalidUrlConfigException
+     *
+     * @return array
+     */
+    public function sendAudit(string $tenantId, array $auditLog): array
+    {
+        return $this->auditsClient->sendAudit($tenantId, $auditLog);
     }
 }

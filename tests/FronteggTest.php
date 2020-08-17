@@ -7,12 +7,10 @@ use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Frontegg;
 use Frontegg\Http\ApiRawResponse;
-use Frontegg\HttpClient\FronteggCurlHttpClient;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
-use PHPUnit\Framework\MockObject\Stub;
-use PHPUnit\Framework\TestCase;
+use Frontegg\Tests\Helper\AuthenticatorTestCaseHelper;
 
-class FronteggTest extends TestCase
+class FronteggTest extends AuthenticatorTestCaseHelper
 {
     /**
      * @throws \Frontegg\Exception\FronteggSDKException
@@ -56,7 +54,9 @@ class FronteggTest extends TestCase
     public function testFronteggInitialized(): void
     {
         // Arrange
-        $httpClient = $this->createSuccessFronteggCurlHttpClientStub();
+        $httpClient = $this->createFronteggCurlHttpClientStub(
+            [$this->createAuthHttpApiRawResponse()]
+        );
         $config = [
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
@@ -79,34 +79,45 @@ class FronteggTest extends TestCase
     }
 
     /**
-     * @param string $accessToken
-     * @param int    $expiresIn Seconds to token expiration
-     * @param int    $httpStatusCode
+     * @throws \Frontegg\Exception\FronteggSDKException
      *
-     * @return Stub|FronteggCurlHttpClient
+     * @return void
      */
-    protected function createSuccessFronteggCurlHttpClientStub(
-        string $accessToken = 'YOUR-JWT-TOKEN',
-        int $expiresIn = 1800,
-        int $httpStatusCode = 200
-    ): Stub {
-        $client = $this->createStub(FronteggCurlHttpClient::class);
-        $client->method('send')
-            ->willReturn(
-                new ApiRawResponse(
-                    [],
-                    sprintf(
-                        '{
-                    "token": "%s",
-                    "expiresIn": %d
-                }',
-                        $accessToken,
-                        $expiresIn
-                    ),
-                    $httpStatusCode
-                )
-            );
+    public function testFronteggGetAudits(): void
+    {
+        // Arrange
+        $authResponse = $this->createAuthHttpApiRawResponse();
+        $auditsResponse = new ApiRawResponse(
+            [],
+            json_encode(
+                [
+                    'data' => [
+                        ['log1'],
+                        ['log 2'],
+                    ],
+                    'total' => 2,
+                ]
+            ),
+            200
+        );
+        $httpClient = $this->createFronteggCurlHttpClientStub(
+            [$authResponse, $auditsResponse]
+        );
+        $config = [
+            'clientId' => 'clientTestID',
+            'clientSecret' => 'apiTestSecretKey',
+            'httpClientHandler' => $httpClient,
+        ];
+        $frontegg = new Frontegg($config);
 
-        return $client;
+        // Act
+        $auditLogs = $frontegg->getAudits('THE-TENANT-ID');
+
+        // Assert
+        $this->assertNotEmpty($auditLogs['data']);
+        $this->assertGreaterThanOrEqual(2, count($auditLogs['data']));
+        $this->assertNotEmpty($auditLogs['total']);
+        $this->assertContains(['log1'], $auditLogs['data']);
+        $this->assertContains(['log 2'], $auditLogs['data']);
     }
 }

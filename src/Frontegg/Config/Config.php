@@ -12,18 +12,20 @@ use Frontegg\Exception\InvalidUrlConfigException;
 class Config
 {
     public const SERVICE_AUTHENTICATION = 'authentication';
+    public const SERVICE_AUDITS = 'audits';
 
     public const SERVICE_AUTHENTICATION_DEFAULT_URL = '/auth/vendor';
+    public const SERVICE_AUDITS_DEFAULT_URL = '/audits';
 
     /**
      * List of allowed API service URLs and its' default values.
      *
      * @var string[]
      */
-    protected static $API_URL_KEYS
-        = [
-            self::SERVICE_AUTHENTICATION => self::SERVICE_AUTHENTICATION_DEFAULT_URL,
-        ];
+    protected static $API_URL_KEYS = [
+        self::SERVICE_AUTHENTICATION => self::SERVICE_AUTHENTICATION_DEFAULT_URL,
+        self::SERVICE_AUDITS => self::SERVICE_AUDITS_DEFAULT_URL,
+    ];
 
     /**
      * Client ID.
