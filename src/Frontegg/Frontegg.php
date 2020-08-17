@@ -162,7 +162,7 @@ class Frontegg
         ?int $count = null,
         ?string $sortBy = null,
         string $sortDirection = 'ASC',
-        ... $filters
+        ...$filters
     ): array {
         return $this->auditsClient->getAudits(
             $tenantId,
