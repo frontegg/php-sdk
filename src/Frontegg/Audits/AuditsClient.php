@@ -183,7 +183,7 @@ class AuditsClient
         $auditLogData = $this->getDecodedJsonData($lastResponse->getBody());
 
         if (null === $auditLogData) {
-            throw new FronteggSDKException('Something strange happened');
+            throw new FronteggSDKException('An error occurred while response data was decoding');
         }
 
         return $auditLogData;
