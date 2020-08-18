@@ -5,15 +5,14 @@ namespace Frontegg\Authenticator;
 use DateTime;
 use Frontegg\Config\Config;
 use Frontegg\Http\ApiRawResponse;
+use Frontegg\Http\Request;
+use Frontegg\Http\Response;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use JsonException;
 
 class Authenticator
 {
-    /**
-     * @const HTTP client request waiting timeout in seconds.
-     */
-    public const HTTP_REQUEST_TIMEOUT = 10;
+    protected const JSON_DECODE_DEPTH = 512;
 
     /**
      * Frontegg configuration.
@@ -45,7 +44,7 @@ class Authenticator
     /**
      * Authenticator constructor.
      *
-     * @param Config $fronteggConfig
+     * @param Config                      $fronteggConfig
      * @param FronteggHttpClientInterface $client
      */
     public function __construct(
@@ -62,6 +61,14 @@ class Authenticator
     public function getConfig(): Config
     {
         return $this->fronteggConfig;
+    }
+
+    /**
+     * @return FronteggHttpClientInterface
+     */
+    public function getClient(): FronteggHttpClientInterface
+    {
+        return $this->client;
     }
 
     /**
@@ -108,13 +115,15 @@ class Authenticator
 
         $this->lastResponse = $this->client->send(
             $url,
-            'POST',
+            Request::METHOD_POST,
             $body,
             ['Content-Type' => 'application/json'],
-            static::HTTP_REQUEST_TIMEOUT
+            Request::HTTP_REQUEST_TIMEOUT
         );
 
-        if (200 !== $this->lastResponse->getHttpResponseCode()) {
+        if (Response::HTTP_STATUS_OK
+            !== $this->lastResponse->getHttpResponseCode()
+        ) {
             $this->setErrorFromResponseData();
 
             return;
@@ -214,7 +223,12 @@ class Authenticator
         }
 
         try {
-            return json_decode($jsonData, true, 512, JSON_THROW_ON_ERROR);
+            return json_decode(
+                $jsonData,
+                true,
+                self::JSON_DECODE_DEPTH,
+                JSON_THROW_ON_ERROR
+            );
         } catch (JsonException $e) {
             $this->apiError = new ApiError('Invalid JSON', $e->getMessage());
             $this->accessToken = null;
