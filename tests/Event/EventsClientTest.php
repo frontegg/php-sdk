@@ -19,7 +19,7 @@ class EventsClientTest extends EventsTestCaseHelper
         // Arrange
         $eventApiResponse = new ApiRawResponse(
             [],
-        '{
+            '{
                 "eventKey":"event-key",
                 "properties":{},
                 "channels":{},

@@ -110,8 +110,7 @@ class SlackChatPostMessageArgumentsTest extends TestCase
     /**
      * @return void
      */
-    public function testEmptySlackChatPostMessageArgumentsCanBeSerialized(
-    ): void
+    public function testEmptySlackChatPostMessageArgumentsCanBeSerialized(): void
     {
         // Arrange
         $object = new SlackChatPostMessageArguments(
