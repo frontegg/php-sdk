@@ -5,6 +5,10 @@ namespace Frontegg\Tests;
 use Frontegg\Authenticator\AccessToken;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
+use Frontegg\Event\Type\ChannelsConfig;
+use Frontegg\Event\Type\DefaultProperties;
+use Frontegg\Event\Type\TriggerOptions;
+use Frontegg\Event\Type\WebHookBody;
 use Frontegg\Frontegg;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
@@ -119,5 +123,57 @@ class FronteggTest extends AuthenticatorTestCaseHelper
         $this->assertNotEmpty($auditLogs['total']);
         $this->assertContains(['log1'], $auditLogs['data']);
         $this->assertContains(['log 2'], $auditLogs['data']);
+    }
+
+    /**
+     * @throws \Frontegg\Exception\FronteggSDKException
+     *
+     * @return void
+     */
+    public function testFronteggTriggerEvent(): void
+    {
+        // Arrange
+        $authResponse = $this->createAuthHttpApiRawResponse();
+        $eventsResponse = new ApiRawResponse(
+            [],
+            '{data: Success}',
+            200
+        );
+        $httpClient = $this->createFronteggCurlHttpClientStub(
+            [$authResponse, $eventsResponse]
+        );
+        $config = [
+            'clientId' => 'clientTestID',
+            'clientSecret' => 'apiTestSecretKey',
+            'httpClientHandler' => $httpClient,
+        ];
+        $frontegg = new Frontegg($config);
+
+        $webhookBody = new WebHookBody(
+            [
+                'field 1' => 'value 1',
+                'field 2' => 'value 2',
+                'field 3' => 'value 3',
+            ]
+        );
+
+        $channelsConfiguration = new ChannelsConfig();
+        $channelsConfiguration->setWebhook($webhookBody);
+
+        $triggerOptions = new TriggerOptions(
+            'event-key',
+            new DefaultProperties(
+                'Default notification title',
+                'Default notification description!'
+            ),
+            $channelsConfiguration,
+            'THE-TENANT-ID'
+        );
+
+        // Act
+        $response = $frontegg->triggerEvent($triggerOptions);
+
+        // Assert
+        $this->assertNotNull($response['data']);
     }
 }

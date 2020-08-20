@@ -1,6 +1,6 @@
 <?php
 
-namespace Frontegg\Tests\Audits;
+namespace Frontegg\Tests\Audit;
 
 use DateTime;
 use Frontegg\Exception\AuthenticationException;

@@ -40,6 +40,7 @@ class ConfigTest extends TestCase
             [
                 Config::SERVICE_AUTHENTICATION => '/test/auth',
                 Config::SERVICE_AUDITS => '/audits',
+                Config::SERVICE_EVENTS => '/eventzz',
                 'randomUrl' => 'should not be in the config',
             ]
         );
@@ -53,6 +54,10 @@ class ConfigTest extends TestCase
         $this->assertEquals(
             'https://api.frontegg.com/audits',
             $config->getServiceUrl(Config::SERVICE_AUDITS)
+        );
+        $this->assertEquals(
+            'https://api.frontegg.com/eventzz',
+            $config->getServiceUrl(Config::SERVICE_EVENTS)
         );
         $this->expectException(InvalidUrlConfigException::class);
         $this->assertNotEquals(

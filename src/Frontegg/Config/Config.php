@@ -13,9 +13,11 @@ class Config
 {
     public const SERVICE_AUTHENTICATION = 'authentication';
     public const SERVICE_AUDITS = 'audits';
+    public const SERVICE_EVENTS = 'events';
 
     public const SERVICE_AUTHENTICATION_DEFAULT_URL = '/auth/vendor';
     public const SERVICE_AUDITS_DEFAULT_URL = '/audits';
+    public const SERVICE_EVENTS_DEFAULT_URL = '/event/resources/triggers/v1';
 
     /**
      * List of allowed API service URLs and its' default values.
@@ -25,6 +27,7 @@ class Config
     protected static $API_URL_KEYS = [
         self::SERVICE_AUTHENTICATION => self::SERVICE_AUTHENTICATION_DEFAULT_URL,
         self::SERVICE_AUDITS => self::SERVICE_AUDITS_DEFAULT_URL,
+        self::SERVICE_EVENTS => self::SERVICE_EVENTS_DEFAULT_URL,
     ];
 
     /**
