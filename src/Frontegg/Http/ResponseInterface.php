@@ -2,7 +2,7 @@
 
 namespace Frontegg\Http;
 
-interface Response
+interface ResponseInterface
 {
     const HTTP_STATUS_OK = 200;
     const HTTP_STATUS_ACCEPTED = 202;
