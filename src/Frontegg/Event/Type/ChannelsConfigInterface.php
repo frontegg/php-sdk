@@ -2,8 +2,6 @@
 
 namespace Frontegg\Event\Type;
 
-use ArrayObject;
-
 interface ChannelsConfigInterface extends SerializableInterface
 {
     /**
@@ -12,9 +10,9 @@ interface ChannelsConfigInterface extends SerializableInterface
     public function getWebHook(): ?WebHookBody;
 
     /**
-     * @return ArrayObject|null
+     * @return SlackChatPostMessageArgumentsInterface|null
      */
-    public function getSlack(): ?ArrayObject;
+    public function getSlack(): ?SlackChatPostMessageArgumentsInterface;
 
     /**
      * @return WebPushPropertiesInterface|null

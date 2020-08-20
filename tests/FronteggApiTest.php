@@ -4,6 +4,10 @@ namespace Frontegg\Tests;
 
 use Frontegg\Authenticator\AccessToken;
 use Frontegg\Authenticator\Authenticator;
+use Frontegg\Event\Type\ChannelsConfig;
+use Frontegg\Event\Type\DefaultProperties;
+use Frontegg\Event\Type\TriggerOptions;
+use Frontegg\Event\Type\WebHookBody;
 use Frontegg\Frontegg;
 use PHPUnit\Framework\TestCase;
 
@@ -123,6 +127,37 @@ class FronteggApiTest extends TestCase
                 $auditsLogData
             );
         }
+    }
+
+    /**
+     * @throws \Frontegg\Exception\AuthenticationException
+     * @throws \Frontegg\Exception\FronteggSDKException
+     *
+     * @return void
+     */
+    public function testEventsClientCanTriggerEvent(): void
+    {
+        // Arrange
+        $triggerOptions = new TriggerOptions(
+            'event-key-for-test',
+            new DefaultProperties(
+                'Default title',
+                'Default description'
+            ),
+            new ChannelsConfig(
+                new WebHookBody([
+                    'title' => 'Test title!',
+                ])
+            ),
+            self::TENANT_ID
+        );
+
+        // Act
+        $triggeredEvent = $this->fronteggClient->triggerEvent($triggerOptions);
+
+        // Assert
+        $this->assertEquals('event-key-for-test', $triggeredEvent['eventKey']);
+        $this->assertEquals(self::TENANT_ID, $triggeredEvent['tenantId']);
     }
 
     /**

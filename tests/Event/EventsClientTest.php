@@ -19,7 +19,13 @@ class EventsClientTest extends EventsTestCaseHelper
         // Arrange
         $eventApiResponse = new ApiRawResponse(
             [],
-        '{data: Success}',
+        '{
+                "eventKey":"event-key",
+                "properties":{},
+                "channels":{},
+                "vendorId":"6da27373-1572-444f-b3c5-ef702ce65123",
+                "tenantId":"THE-TENANT-ID"
+            }',
             200
         );
         $httpClient = $this->createFronteggCurlHttpClientStub(
@@ -52,7 +58,7 @@ class EventsClientTest extends EventsTestCaseHelper
         $response = $eventsClient->trigger($triggerOptions);
 
         // Assert
-        var_dump($response);
-        $this->assertNotNull($response['data']);
+        $this->assertEquals('event-key', $response['eventKey']);
+        $this->assertEquals('THE-TENANT-ID', $response['tenantId']);
     }
 }

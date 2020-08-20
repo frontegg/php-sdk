@@ -14,11 +14,9 @@ class ChannelsConfig implements ChannelsConfigInterface
     protected $webHook;
 
     /**
-     * @TODO: Refactor this to use class "ChatPostMessageArguments" from "@slack/web-api".
-     *
      * Properties for this channel. If set to null then default properties will be sent.
      *
-     * @var ArrayObject|null
+     * @var SlackChatPostMessageArgumentsInterface|null
      */
     protected $slack;
 
@@ -46,18 +44,18 @@ class ChannelsConfig implements ChannelsConfigInterface
     /**
      * ChannelsConfig constructor.
      *
-     * @param WebHookBody|null                $webHook
-     * @param WebPushPropertiesInterface|null $webPush
-     * @param AuditPropertiesInterface|null   $audit
-     * @param BellPropertiesInterface|null    $bell
-     * @param ArrayObject|null                      $slack
+     * @param WebHookBody|null                            $webHook
+     * @param WebPushPropertiesInterface|null             $webPush
+     * @param AuditPropertiesInterface|null               $audit
+     * @param BellPropertiesInterface|null                $bell
+     * @param SlackChatPostMessageArgumentsInterface|null $slack
      */
     public function __construct(
         ?WebHookBody $webHook = null,
         ?WebPushPropertiesInterface $webPush = null,
         ?AuditPropertiesInterface $audit = null,
         ?BellPropertiesInterface $bell = null,
-        ?ArrayObject $slack = null
+        ?SlackChatPostMessageArgumentsInterface $slack = null
     ) {
         $this->webHook = $webHook;
         $this->slack = $slack;
@@ -83,17 +81,17 @@ class ChannelsConfig implements ChannelsConfigInterface
     }
 
     /**
-     * @return ArrayObject|null
+     * @return SlackChatPostMessageArgumentsInterface|null
      */
-    public function getSlack(): ?ArrayObject
+    public function getSlack(): ?SlackChatPostMessageArgumentsInterface
     {
         return $this->slack;
     }
 
     /**
-     * @param ArrayObject|null $slack
+     * @param SlackChatPostMessageArgumentsInterface|null $slack
      */
-    public function setSlack(?ArrayObject $slack): void
+    public function setSlack(?SlackChatPostMessageArgumentsInterface $slack): void
     {
         $this->slack = $slack;
     }
@@ -179,11 +177,13 @@ class ChannelsConfig implements ChannelsConfigInterface
     public function toArray(): array
     {
         return [
-            'webhook' => $this->webHook !== null ? $this->webHook->toArray() : true,
-            'webpush' => $this->webPush !== null ? $this->webPush->toArray() : true,
+            'webhook' => $this->webHook !== null ? $this->webHook->toArray()
+                : true,
+            'webpush' => $this->webPush !== null ? $this->webPush->toArray()
+                : true,
             'audit' => $this->audit !== null ? $this->audit->toArray() : true,
             'bell' => $this->bell !== null ? $this->bell->toArray() : true,
-            'slack' => $this->slack !== null ? (array)$this->slack : true,
+            'slack' => $this->slack !== null ? $this->slack->toArray() : true,
         ];
     }
 }

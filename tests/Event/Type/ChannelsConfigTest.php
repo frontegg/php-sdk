@@ -12,6 +12,8 @@ use Frontegg\Event\Type\BellPropertiesInterface;
 use Frontegg\Event\Type\ChannelsConfig;
 use Frontegg\Event\Type\ChannelsConfigInterface;
 use Frontegg\Event\Type\SerializableInterface;
+use Frontegg\Event\Type\SlackChatPostMessageArguments;
+use Frontegg\Event\Type\SlackChatPostMessageArgumentsInterface;
 use Frontegg\Event\Type\WebHookBody;
 use Frontegg\Event\Type\WebPushProperties;
 use Frontegg\Event\Type\WebPushPropertiesInterface;
@@ -73,8 +75,13 @@ class ChannelsConfigTest extends TestCase
                 ]
             )
         );
-        // @TODO: Implement Slack integration.
-        $object->setSlack(new ArrayObject());
+        $object->setSlack(
+            new SlackChatPostMessageArguments(
+                'SLACK-API-TOKEN',
+                '#general',
+                'Some text to show!'
+            )
+        );
 
         // Assert
         $this->assertInstanceOf(
@@ -98,7 +105,7 @@ class ChannelsConfigTest extends TestCase
             $object->getBell()
         );
         $this->assertInstanceOf(
-            ArrayObject::class,
+            SlackChatPostMessageArgumentsInterface::class,
             $object->getSlack()
         );
     }
@@ -157,8 +164,13 @@ class ChannelsConfigTest extends TestCase
                 ]
             )
         );
-        // @TODO: Implement Slack integration.
-        $object->setSlack(new ArrayObject());
+        $object->setSlack(
+            new SlackChatPostMessageArguments(
+                'SLACK-API-TOKEN',
+                '#general',
+                'Some text to show!'
+            )
+        );
 
         // Act
         $json = $object->toJSON();
@@ -200,7 +212,24 @@ class ChannelsConfigTest extends TestCase
                     "field 2": "value 2",
                     "field 3": "value 3"
                 },
-                "slack": {}
+                "slack": {
+                    "token": "SLACK-API-TOKEN",
+                    "channel": "#general",
+                    "text": "Some text to show!",
+                    "as_user": null,
+                    "attachments": {},
+                    "blocks": {},
+                    "icon_emoji": null,
+                    "icon_url": null,
+                    "link_names": null,
+                    "mrkdwn": null,
+                    "parse": "none",
+                    "reply_broadcast": null,
+                    "thread_ts": null,
+                    "unfurl_links": null,
+                    "unfurl_media": null,
+                    "username": null
+                }
             }',
             $json
         );

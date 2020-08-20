@@ -136,7 +136,13 @@ class FronteggTest extends AuthenticatorTestCaseHelper
         $authResponse = $this->createAuthHttpApiRawResponse();
         $eventsResponse = new ApiRawResponse(
             [],
-            '{data: Success}',
+            '{
+                "eventKey":"event-key",
+                "properties":{},
+                "channels":{},
+                "vendorId":"6da27373-1572-444f-b3c5-ef702ce65123",
+                "tenantId":"THE-TENANT-ID"
+            }',
             200
         );
         $httpClient = $this->createFronteggCurlHttpClientStub(
@@ -174,6 +180,7 @@ class FronteggTest extends AuthenticatorTestCaseHelper
         $response = $frontegg->triggerEvent($triggerOptions);
 
         // Assert
-        $this->assertNotNull($response['data']);
+        $this->assertEquals('event-key', $response['eventKey']);
+        $this->assertEquals('THE-TENANT-ID', $response['tenantId']);
     }
 }

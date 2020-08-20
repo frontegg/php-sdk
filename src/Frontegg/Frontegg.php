@@ -209,7 +209,19 @@ class Frontegg
         return $this->auditsClient->sendAudit($tenantId, $auditLog);
     }
 
-    public function triggerEvent(TriggerOptionsInterface $triggerOptions)
+    /**
+     * Trigger the event specified by trigger options.
+     *
+     * @param TriggerOptionsInterface $triggerOptions
+     *
+     * @throws AuthenticationException
+     * @throws FronteggSDKException
+     * @throws InvalidParameterException
+     * @throws \Frontegg\Exception\InvalidUrlConfigException
+     *
+     * @return array
+     */
+    public function triggerEvent(TriggerOptionsInterface $triggerOptions): array
     {
         return $this->eventsClient->trigger($triggerOptions);
     }
