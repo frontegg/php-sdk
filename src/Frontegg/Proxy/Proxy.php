@@ -2,8 +2,11 @@
 
 namespace Frontegg\Proxy;
 
+use Frontegg\Authenticator\Authenticator;
 use Frontegg\Exception\UnexpectedValueException;
+use Frontegg\Http\ApiRawResponse;
 use Frontegg\Http\Uri;
+use Frontegg\HttpClient\FronteggHttpClientInterface;
 use Frontegg\Proxy\Adapter\AdapterInterface;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
@@ -12,6 +15,11 @@ use Relay\RelayBuilder;
 
 class Proxy
 {
+    /**
+     * @var Authenticator
+     */
+    protected $authenticator;
+
     /**
      * @var RequestInterface
      */
@@ -28,12 +36,21 @@ class Proxy
     protected $filters = [];
 
     /**
+     * @TODO: Refactor this later.
+     *
+     * Proxy constructor.
+     *
+     * @param Authenticator $authenticator
      * @param AdapterInterface $adapter
      */
-    public function __construct(AdapterInterface $adapter)
-    {
+    public function __construct(
+        Authenticator $authenticator,
+        AdapterInterface $adapter
+    ) {
+        $this->authenticator = $authenticator;
         $this->adapter = $adapter;
     }
+
 
     /**
      * Prepare the proxy to forward a request instance.
@@ -52,10 +69,12 @@ class Proxy
      * Forward the request to the target url and return the response.
      *
      * @param string $target
-     * @return ResponseInterface
+     *
      * @throws UnexpectedValueException
+     *
+     * @return ApiRawResponse
      */
-    public function to(string $target)
+    public function to(string $target): ApiRawResponse
     {
         if ($this->request === null) {
             throw new UnexpectedValueException('Missing request instance.');
@@ -86,6 +105,43 @@ class Proxy
 
         $relay = (new RelayBuilder)->newInstance($stack);
 
-        return $relay($request, new Response);
+        $response = $relay($request, new Response);
+
+        // @TODO: Refactor this later.
+        $apiRawResponse = $this->getAdaptedApiRawResponse($response);
+
+        return $apiRawResponse;
+    }
+
+    /**
+     * @return Authenticator
+     */
+    public function getAuthenticator(): Authenticator
+    {
+        return $this->authenticator;
+    }
+
+    /**
+     * @return FronteggHttpClientInterface
+     */
+    protected function getHttpClient(): FronteggHttpClientInterface
+    {
+        return $this->getAuthenticator()->getClient();
+    }
+
+    /**
+     * @TODO: Refactor this later.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return ApiRawResponse
+     */
+    protected function getAdaptedApiRawResponse(ResponseInterface $response): ApiRawResponse
+    {
+        return new ApiRawResponse(
+            $response->getHeaders(),
+            $response->getBody(),
+            $response->getStatusCode()
+        );
     }
 }

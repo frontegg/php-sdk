@@ -15,5 +15,5 @@ interface AdapterInterface
      *
      * @return ResponseInterface|ApiRawResponse
      */
-    public function send(RequestInterface $request);
+    public function send(RequestInterface $request): ResponseInterface;
 }

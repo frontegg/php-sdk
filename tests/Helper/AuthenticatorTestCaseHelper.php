@@ -6,22 +6,23 @@ use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
+use Frontegg\HttpClient\FronteggHttpClientInterface;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 abstract class AuthenticatorTestCaseHelper extends TestCase
 {
     /**
-     * @param FronteggCurlHttpClient $client
-     * @param string                 $clientId
-     * @param string                 $clientSecret
-     * @param string                 $baseUrl
-     * @param array                  $urls
+     * @param FronteggHttpClientInterface $client
+     * @param string                      $clientId
+     * @param string                      $clientSecret
+     * @param string                      $baseUrl
+     * @param array                       $urls
      *
      * @return Authenticator
      */
     protected function createFronteggAuthenticator(
-        FronteggCurlHttpClient $client,
+        FronteggHttpClientInterface $client,
         string $clientId = 'clientTestID',
         string $clientSecret = 'apiTestSecretKey',
         string $baseUrl = 'http://test',
@@ -35,7 +36,7 @@ abstract class AuthenticatorTestCaseHelper extends TestCase
     /**
      * @param ApiRawResponse[] $authResponses
      *
-     * @return Stub|FronteggCurlHttpClient
+     * @return Stub|FronteggCurlHttpClient|FronteggHttpClientInterface
      */
     protected function createFronteggCurlHttpClientStub(
         array $authResponses = []

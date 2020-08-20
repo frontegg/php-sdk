@@ -13,11 +13,6 @@ use Frontegg\Http\ApiRawResponse;
 class FronteggCurlHttpClient implements FronteggHttpClientInterface
 {
     /**
-     * @var int The default timeout for CURL connection
-     */
-    public const DEFAULT_TIMEOUT = 60;
-
-    /**
      * @var string The client error message
      */
     protected $curlErrorMessage = '';
@@ -50,6 +45,8 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
     }
 
     /**
+     * @TODO: Refactor this to use Request and Response interfaces from the PSR.
+     *
      * @inheritdoc
      */
     public function send(string $url, string $method, string $body, array $headers, int $timeOut = self::DEFAULT_TIMEOUT): ApiRawResponse

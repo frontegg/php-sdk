@@ -3,21 +3,21 @@
 namespace Frontegg\Tests\Helper;
 
 use Frontegg\Audit\AuditsClient;
-use Frontegg\HttpClient\FronteggCurlHttpClient;
+use Frontegg\HttpClient\FronteggHttpClientInterface;
 
 abstract class AuditsTestCaseHelper extends AuthenticatorTestCaseHelper
 {
     /**
-     * @param FronteggCurlHttpClient $client
-     * @param string                 $clientId
-     * @param string                 $clientSecret
-     * @param string                 $baseUrl
-     * @param array                  $urls
+     * @param FronteggHttpClientInterface $client
+     * @param string                      $clientId
+     * @param string                      $clientSecret
+     * @param string                      $baseUrl
+     * @param array                       $urls
      *
      * @return AuditsClient
      */
     protected function createFronteggAuditsClient(
-        FronteggCurlHttpClient $client,
+        FronteggHttpClientInterface $client,
         string $clientId = 'clientTestID',
         string $clientSecret = 'apiTestSecretKey',
         string $baseUrl = 'http://test',
