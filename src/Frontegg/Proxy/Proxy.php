@@ -103,9 +103,9 @@ class Proxy
             return $next($request, $response);
         };
 
-        $relay = (new RelayBuilder)->newInstance($stack);
+        $relay = (new RelayBuilder())->newInstance($stack);
 
-        $response = $relay($request, new Response);
+        $response = $relay($request, new Response());
 
         // @TODO: Refactor this later.
         $apiRawResponse = $this->getAdaptedApiRawResponse($response);

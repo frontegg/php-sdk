@@ -83,7 +83,7 @@ class ConfigTest extends TestCase
 
         // Assert
         $this->assertEquals(
-            $config->getBaseUrl().Config::SERVICE_AUTHENTICATION_DEFAULT_URL,
+            $config->getBaseUrl() . Config::SERVICE_AUTHENTICATION_DEFAULT_URL,
             $config->getServiceUrl(Config::SERVICE_AUTHENTICATION)
         );
         $this->expectException(InvalidUrlConfigException::class);

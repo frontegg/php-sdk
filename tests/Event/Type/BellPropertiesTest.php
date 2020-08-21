@@ -121,7 +121,8 @@ class BellPropertiesTest extends TestCase
     /**
      * @return void
      */
-    public function testBellPropertiesSetIncorrectSeverityValueShouldSetDefaultValueInstead(): void {
+    public function testBellPropertiesSetIncorrectSeverityValueShouldSetDefaultValueInstead(): void
+    {
         // Act
         $object = new BellProperties(
             null,
@@ -137,7 +138,8 @@ class BellPropertiesTest extends TestCase
     /**
      * @return void
      */
-    public function testBellPropertiesSetIncorrectActionsShouldThrowAnException(): void {
+    public function testBellPropertiesSetIncorrectActionsShouldThrowAnException(): void
+    {
         // Act
         $this->expectException(InvalidParameterException::class);
         new BellProperties(

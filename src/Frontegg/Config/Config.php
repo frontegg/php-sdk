@@ -17,7 +17,7 @@ class Config
 
     public const SERVICE_AUTHENTICATION_DEFAULT_URL = '/auth/vendor';
     public const SERVICE_AUDITS_DEFAULT_URL = '/audits';
-    public const SERVICE_EVENTS_DEFAULT_URL = '/event/resources/triggers/v1';
+    public const SERVICE_EVENTS_DEFAULT_URL = '/event/resources/triggers/v2';
 
     /**
      * List of allowed API service URLs and its' default values.
@@ -120,10 +120,10 @@ class Config
         }
 
         if (isset($this->urls[$urlKey])) {
-            return $this->baseUrl.$this->urls[$urlKey];
+            return $this->baseUrl . $this->urls[$urlKey];
         }
 
-        return $this->baseUrl.static::$API_URL_KEYS[$urlKey];
+        return $this->baseUrl . static::$API_URL_KEYS[$urlKey];
     }
 
     /**

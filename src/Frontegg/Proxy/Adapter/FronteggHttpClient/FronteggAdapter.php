@@ -33,7 +33,7 @@ class FronteggAdapter implements AdapterInterface
      *
      * @throws \Frontegg\Exception\FronteggSDKException
      *
-     * @return ResponseInterface|ApiRawResponse
+     * @return ResponseInterface
      */
     public function send(RequestInterface $request): ResponseInterface
     {

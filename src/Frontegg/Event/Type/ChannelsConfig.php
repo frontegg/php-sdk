@@ -151,7 +151,8 @@ class ChannelsConfig implements ChannelsConfigInterface
      */
     public function isConfigured(): bool
     {
-        if ($this->webHook !== null
+        if (
+            $this->webHook !== null
             || $this->webPush !== null
             || $this->audit !== null
             || $this->bell !== null

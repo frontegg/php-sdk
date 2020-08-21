@@ -45,7 +45,7 @@ class WebHookBody implements SerializableInterface
      * Sets value for specified field name.
      *
      * @param string $field
-     * @param        $value
+     * @param mixed  $value
      *
      * @return void
      */

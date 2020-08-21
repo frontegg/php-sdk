@@ -19,27 +19,27 @@ class Frontegg
     /**
      * @const string Version number of the Frontegg PHP SDK.
      */
-    const VERSION = '0.2.0';
+    public const VERSION = '0.2.0';
 
     /**
      * @const string Default API version for requests.
      */
-    const DEFAULT_API_VERSION = 'v1.0';
+    public const DEFAULT_API_VERSION = 'v1.0';
 
     /**
      * @const string The name of the environment variable that contains the client ID.
      */
-    const CLIENT_ID_ENV_NAME = 'FRONTEGG_CLIENT_ID';
+    public const CLIENT_ID_ENV_NAME = 'FRONTEGG_CLIENT_ID';
 
     /**
      * @const string The name of the environment variable that contains the client secret key.
      */
-    const CLIENT_SECRET_ENV_NAME = 'FRONTEGG_CLIENT_SECRET_KEY';
+    public const CLIENT_SECRET_ENV_NAME = 'FRONTEGG_CLIENT_SECRET_KEY';
 
     /**
      * @const string Default API version for requests.
      */
-    const DEFAULT_API_BASE_URL = 'https://api.frontegg.com';
+    public const DEFAULT_API_BASE_URL = 'https://api.frontegg.com';
 
     /**
      * @var FronteggHttpClientInterface
@@ -142,6 +142,22 @@ class Frontegg
     }
 
     /**
+     * @return AuditsClient
+     */
+    public function getAuditsClient(): AuditsClient
+    {
+        return $this->auditsClient;
+    }
+
+    /**
+     * @return EventsClient
+     */
+    public function getEventsClient(): EventsClient
+    {
+        return $this->eventsClient;
+    }
+
+    /**
      * Initialize Frontegg service by authenticating into the Frontegg API.
      *
      * @return void
@@ -211,17 +227,19 @@ class Frontegg
 
     /**
      * Trigger the event specified by trigger options.
+     * Returns true on success.
+     * Returns true on failure and $apiError property will contain an error.
      *
      * @param TriggerOptionsInterface $triggerOptions
      *
-     * @throws AuthenticationException
+     * @throws Exception\EventTriggerException
      * @throws FronteggSDKException
      * @throws InvalidParameterException
-     * @throws \Frontegg\Exception\InvalidUrlConfigException
+     * @throws InvalidUrlConfigException
      *
-     * @return array
+     * @return bool
      */
-    public function triggerEvent(TriggerOptionsInterface $triggerOptions): array
+    public function triggerEvent(TriggerOptionsInterface $triggerOptions): bool
     {
         return $this->eventsClient->trigger($triggerOptions);
     }

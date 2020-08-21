@@ -24,6 +24,11 @@ class AuditsClient
     protected $authenticator;
 
     /**
+     * @var ApiError|null
+     */
+    protected $apiError;
+
+    /**
      * AuditsClient constructor.
      *
      * @param Authenticator $authenticator
@@ -173,10 +178,12 @@ class AuditsClient
             RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
-        if (!in_array(
-            $lastResponse->getHttpResponseCode(),
-            [ResponseInterface::HTTP_STATUS_OK, ResponseInterface::HTTP_STATUS_ACCEPTED]
-        )) {
+        if (
+            !in_array(
+                $lastResponse->getHttpResponseCode(),
+                [ResponseInterface::HTTP_STATUS_OK, ResponseInterface::HTTP_STATUS_ACCEPTED]
+            )
+        ) {
             throw new AuthenticationException($lastResponse->getBody());
         }
 
@@ -219,5 +226,13 @@ class AuditsClient
         }
 
         return null;
+    }
+
+    /**
+     * @return ApiError|null
+     */
+    public function getApiError(): ?ApiError
+    {
+        return $this->apiError;
     }
 }

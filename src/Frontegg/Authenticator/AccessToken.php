@@ -55,7 +55,8 @@ class AccessToken
      */
     public function isValid(): bool
     {
-        if (!$this->value
+        if (
+            !$this->value
             || $this->expiresAt->getTimestamp() <= ((new DateTime())->getTimestamp())
         ) {
             return false;

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Frontegg\Http;
 
 use Psr\Http\Message\UriInterface;
@@ -13,10 +12,24 @@ class Uri implements UriInterface
      * we apply this default host when no host is given yet to form a
      * valid URI.
      */
-    const HTTP_DEFAULT_HOST = 'localhost';
+    public const HTTP_DEFAULT_HOST = 'localhost';
 
     private static $charUnreserved = 'a-zA-Z0-9_\-\.~';
     private static $charSubDelims = '!\$&\'\(\)\*\+,;=';
+
+    private static $defaultPorts = [
+        'http'  => 80,
+        'https' => 443,
+        'ftp' => 21,
+        'gopher' => 70,
+        'nntp' => 119,
+        'news' => 119,
+        'telnet' => 23,
+        'tn3270' => 23,
+        'imap' => 143,
+        'pop' => 110,
+        'ldap' => 389,
+    ];
 
     /** @var string Uri scheme. */
     private $scheme = '';
@@ -87,7 +100,7 @@ class Uri implements UriInterface
             $uri .= $scheme . ':';
         }
 
-        if ($authority != ''|| $scheme === 'file') {
+        if ($authority != '' || $scheme === 'file') {
             $uri .= '//' . $authority;
         }
 
@@ -260,6 +273,22 @@ class Uri implements UriInterface
         $new->fragment = $fragment;
 
         return $new;
+    }
+
+    /**
+     * Whether the URI has the default port of the current scheme.
+     *
+     * `Psr\Http\Message\UriInterface::getPort` may return null or the standard port. This method can be used
+     * independently of the implementation.
+     *
+     * @param UriInterface $uri
+     *
+     * @return bool
+     */
+    public static function isDefaultPort(UriInterface $uri)
+    {
+        return $uri->getPort() === null
+            || (isset(self::$defaultPorts[$uri->getScheme()]) && $uri->getPort() === self::$defaultPorts[$uri->getScheme()]);
     }
 
     /**
@@ -437,19 +466,26 @@ class Uri implements UriInterface
 
         if ($this->getAuthority() === '') {
             if (0 === strpos($this->path, '//')) {
-                throw new \InvalidArgumentException('The path of a URI without an authority must not start with two slashes "//"');
+                throw new \InvalidArgumentException(
+                    'The path of a URI without an authority must not start with two slashes "//"'
+                );
             }
             if ($this->scheme === '' && false !== strpos(explode('/', $this->path, 2)[0], ':')) {
-                throw new \InvalidArgumentException('A relative URI must not have a path beginning with a segment containing a colon');
+                throw new \InvalidArgumentException(
+                    'A relative URI must not have a path beginning with a segment containing a colon'
+                );
             }
         } elseif (isset($this->path[0]) && $this->path[0] !== '/') {
             @trigger_error(
-                'The path of a URI with an authority must start with a slash "/" or be empty. Automagically fixing the URI ' .
-                'by adding a leading slash to the path is deprecated since version 1.4 and will throw an exception instead.',
+                'The path of a URI with an authority must start with a slash "/" or be empty.
+                Automagically fixing the URI by adding a leading slash to the path
+                is deprecated since version 1.4 and will throw an exception instead.',
                 E_USER_DEPRECATED
             );
-            $this->path = '/'. $this->path;
-            //throw new \InvalidArgumentException('The path of a URI with an authority must start with a slash "/" or be empty');
+            $this->path = '/' . $this->path;
+//            throw new \InvalidArgumentException(
+//                'The path of a URI with an authority must start with a slash "/" or be empty'
+//            );
         }
     }
 }

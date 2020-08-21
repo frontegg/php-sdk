@@ -121,7 +121,8 @@ class Authenticator
             RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
-        if (ResponseInterface::HTTP_STATUS_OK
+        if (
+            ResponseInterface::HTTP_STATUS_OK
             !== $this->lastResponse->getHttpResponseCode()
         ) {
             $this->setErrorFromResponseData();
@@ -159,7 +160,8 @@ class Authenticator
             $this->lastResponse->getBody()
         );
 
-        if (!$responseBodyDecoded
+        if (
+            !$responseBodyDecoded
             || !isset($responseBodyDecoded['token'])
             || !isset($responseBodyDecoded['expiresIn'])
         ) {
@@ -197,7 +199,7 @@ class Authenticator
 
         $this->apiError = new ApiError(
             $errorDecoded['error'] ?? '',
-            $errorDecoded['message'] ?? '',
+            $errorDecoded['message'] ? print_r($errorDecoded['message'], true) : '',
             $errorDecoded['statusCode'] ?? null,
         );
         $this->accessToken = null;

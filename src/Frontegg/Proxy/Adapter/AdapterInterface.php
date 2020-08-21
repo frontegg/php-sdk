@@ -13,7 +13,7 @@ interface AdapterInterface
      *
      * @param RequestInterface $request
      *
-     * @return ResponseInterface|ApiRawResponse
+     * @return ResponseInterface
      */
     public function send(RequestInterface $request): ResponseInterface;
 }

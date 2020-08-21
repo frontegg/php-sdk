@@ -50,13 +50,13 @@ class AuditPropertiesTest extends TestCase
     /**
      * @return void
      */
-    public function testAuditPropertiesSetIncorrectSeverityValueShouldSetDefaultValueInstead(
-    ): void
+    public function testAuditPropertiesSetIncorrectSeverityValueShouldSetDefaultValueInstead(): void
     {
         // Act
         $object = new AuditProperties(
             'Something strange happened'
-        );;
+        );
+        ;
 
         // Assert
         $this->assertEquals('Info', $object->getSeverity());

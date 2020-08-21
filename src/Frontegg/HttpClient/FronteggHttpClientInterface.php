@@ -27,9 +27,15 @@ interface FronteggHttpClientInterface
      * @param array  $headers The request headers.
      * @param int    $timeOut The timeout in seconds for the request.
      *
+     * @throws \Frontegg\Exception\FronteggSDKException
      * @return \Frontegg\Http\ApiRawResponse Raw response from the server.
      *
-     * @throws \Frontegg\Exception\FronteggSDKException
      */
-    public function send(string $url, string $method, string $body, array $headers, int $timeOut = self::DEFAULT_TIMEOUT): ApiRawResponse;
+    public function send(
+        string $url,
+        string $method,
+        string $body,
+        array $headers,
+        int $timeOut = self::DEFAULT_TIMEOUT
+    ): ApiRawResponse;
 }
