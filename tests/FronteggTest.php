@@ -177,10 +177,10 @@ class FronteggTest extends AuthenticatorTestCaseHelper
         );
 
         // Act
-        $response = $frontegg->triggerEvent($triggerOptions);
+        $isSuccess = $frontegg->triggerEvent($triggerOptions);
 
         // Assert
-        $this->assertEquals('event-key', $response['eventKey']);
-        $this->assertEquals('THE-TENANT-ID', $response['tenantId']);
+        $this->assertTrue($isSuccess);
+        $this->assertNull($frontegg->getEventsClient()->getApiError());
     }
 }

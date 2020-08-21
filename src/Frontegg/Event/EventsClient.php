@@ -6,9 +6,10 @@ use Frontegg\Authenticator\ApiError;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Event\Type\TriggerOptionsInterface;
-use Frontegg\Exception\AuthenticationException;
+use Frontegg\Exception\EventTriggerException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
+use Frontegg\Http\ApiRawResponse;
 use Frontegg\Http\RequestInterface;
 use Frontegg\Http\ResponseInterface;
 use JsonException;
@@ -23,6 +24,13 @@ class EventsClient
     protected $authenticator;
 
     /**
+     * API error.
+     *
+     * @var ApiError|null
+     */
+    protected $apiError;
+
+    /**
      * EventsClient constructor.
      *
      * @param Authenticator $authenticator
@@ -34,17 +42,19 @@ class EventsClient
 
     /**
      * Trigger the event specified by trigger options.
+     * Returns true on success.
+     * Returns true on failure and $apiError property will contain an error.
      *
      * @param TriggerOptionsInterface $triggerOptions
      *
-     * @throws AuthenticationException
+     * @throws EventTriggerException
      * @throws FronteggSDKException
      * @throws InvalidParameterException
      * @throws \Frontegg\Exception\InvalidUrlConfigException
      *
-     * @return array
+     * @return bool
      */
-    public function trigger(TriggerOptionsInterface $triggerOptions): array
+    public function trigger(TriggerOptionsInterface $triggerOptions): bool
     {
         if (!$triggerOptions->getChannels()->isConfigured()) {
             throw new InvalidParameterException(
@@ -62,7 +72,7 @@ class EventsClient
             ->getValue();
         $fronteggConfig = $this->authenticator->getConfig();
         $url = $fronteggConfig->getServiceUrl(
-            Config::SERVICE_AUDITS
+            Config::SERVICE_EVENTS
         );
         $headers = [
             'Content-Type' => 'application/json',
@@ -75,8 +85,8 @@ class EventsClient
             RequestInterface::METHOD_POST,
             json_encode([
                 'eventKey' => $triggerOptions->getEventKey(),
-                'properties' => $triggerOptions->getDefaultProperties(),
-                'channels' => $triggerOptions->getChannels(),
+                'properties' => $triggerOptions->getDefaultProperties()->toArray(),
+                'channels' => $triggerOptions->getChannels()->toArray(),
             ]),
             $headers,
             RequestInterface::HTTP_REQUEST_TIMEOUT
@@ -86,16 +96,37 @@ class EventsClient
             $lastResponse->getHttpResponseCode(),
             [ResponseInterface::HTTP_STATUS_OK, ResponseInterface::HTTP_STATUS_ACCEPTED]
         )) {
-            throw new AuthenticationException($lastResponse->getBody());
+            if (empty($lastResponse->getBody())) {
+                throw new EventTriggerException($lastResponse->getBody());
+            }
+            $this->setErrorFromResponseData($lastResponse);
+
+            return false;
         }
 
-        $triggeredEventData = $this->getDecodedJsonData($lastResponse->getBody());
+        return true;
+    }
 
-        if (null === $triggeredEventData) {
-            throw new FronteggSDKException('An error occurred while response data was decoding');
-        }
+    /**
+     * Sets an error data from response data.
+     * Sets access token to null.
+     *
+     * @param ApiRawResponse $response
+     *
+     * @return void
+     */
+    protected function setErrorFromResponseData(ApiRawResponse $response): void
+    {
+        $errorDecoded = $this->getDecodedJsonData(
+            $response->getBody()
+        );
 
-        return $triggeredEventData;
+        var_dump($errorDecoded);
+        $this->apiError = new ApiError(
+            $errorDecoded['error'] ?? '',
+            $errorDecoded['message'] ? print_r($errorDecoded['message'], true) : '',
+            $errorDecoded['statusCode'] ?? null,
+        );
     }
 
     /**
@@ -128,5 +159,13 @@ class EventsClient
         }
 
         return null;
+    }
+
+    /**
+     * @return ApiError|null
+     */
+    public function getApiError(): ?ApiError
+    {
+        return $this->apiError;
     }
 }

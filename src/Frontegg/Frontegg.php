@@ -142,6 +142,22 @@ class Frontegg
     }
 
     /**
+     * @return AuditsClient
+     */
+    public function getAuditsClient(): AuditsClient
+    {
+        return $this->auditsClient;
+    }
+
+    /**
+     * @return EventsClient
+     */
+    public function getEventsClient(): EventsClient
+    {
+        return $this->eventsClient;
+    }
+
+    /**
      * Initialize Frontegg service by authenticating into the Frontegg API.
      *
      * @return void
@@ -211,17 +227,19 @@ class Frontegg
 
     /**
      * Trigger the event specified by trigger options.
+     * Returns true on success.
+     * Returns true on failure and $apiError property will contain an error.
      *
      * @param TriggerOptionsInterface $triggerOptions
      *
-     * @throws AuthenticationException
+     * @throws Exception\EventTriggerException
      * @throws FronteggSDKException
      * @throws InvalidParameterException
-     * @throws \Frontegg\Exception\InvalidUrlConfigException
+     * @throws InvalidUrlConfigException
      *
-     * @return array
+     * @return bool
      */
-    public function triggerEvent(TriggerOptionsInterface $triggerOptions): array
+    public function triggerEvent(TriggerOptionsInterface $triggerOptions): bool
     {
         return $this->eventsClient->trigger($triggerOptions);
     }

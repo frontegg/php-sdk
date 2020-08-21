@@ -2,10 +2,12 @@
 
 namespace Frontegg\Tests\Event;
 
+use Frontegg\Authenticator\ApiError;
 use Frontegg\Event\Type\ChannelsConfig;
 use Frontegg\Event\Type\DefaultProperties;
 use Frontegg\Event\Type\TriggerOptions;
 use Frontegg\Event\Type\WebHookBody;
+use Frontegg\Exception\EventTriggerException;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\Tests\Helper\EventsTestCaseHelper;
 
@@ -55,10 +57,64 @@ class EventsClientTest extends EventsTestCaseHelper
         );
 
         // Act
-        $response = $eventsClient->trigger($triggerOptions);
+        $isSuccess = $eventsClient->trigger($triggerOptions);
 
         // Assert
-        $this->assertEquals('event-key', $response['eventKey']);
-        $this->assertEquals('THE-TENANT-ID', $response['tenantId']);
+        $this->assertTrue($isSuccess);
+        $this->assertNull($eventsClient->getApiError());
+    }
+
+    /**
+     * @return void
+     */
+    public function testEventsClientTriggeringEventFailed(): void
+    {
+        // Arrange
+        $eventApiResponse = new ApiRawResponse(
+            [],
+            '{
+                "statusCode":400,
+                "message":[
+                    "metadata should not be empty",
+                    "channels must contain at least 1 elements",
+                    "each value in channels must be a string",
+                    "channels must be an array"
+                ],
+                "error":"Bad Request"
+            }',
+            400
+        );
+        $httpClient = $this->createFronteggCurlHttpClientStub(
+            [$this->createAuthHttpApiRawResponse(), $eventApiResponse]
+        );
+        $eventsClient = $this->createFronteggEventsClient($httpClient);
+
+        $webhookBody = new WebHookBody(
+            [
+                'field 1' => 'value 1',
+                'field 2' => 'value 2',
+                'field 3' => 'value 3',
+            ]
+        );
+
+        $channelsConfiguration = new ChannelsConfig();
+        $channelsConfiguration->setWebhook($webhookBody);
+
+        $triggerOptions = new TriggerOptions(
+            'event-key',
+            new DefaultProperties(
+                'Default notification title',
+                'Default notification description!'
+            ),
+            $channelsConfiguration,
+            'THE-TENANT-ID'
+        );
+
+        // Act
+        $isSuccess = $eventsClient->trigger($triggerOptions);
+
+        // Assert
+        $this->assertFalse($isSuccess);
+        $this->assertInstanceOf(ApiError::class, $eventsClient->getApiError());
     }
 }
