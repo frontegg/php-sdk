@@ -86,7 +86,7 @@ class AuditsClient
             ->getValue();
         $fronteggConfig = $this->authenticator->getConfig();
         $url = $fronteggConfig->getServiceUrl(
-            Config::SERVICE_AUDITS
+            Config::AUDITS_SERVICE
         );
         $body = json_encode(
             array_merge(
@@ -168,7 +168,7 @@ class AuditsClient
             ->getValue();
         $fronteggConfig = $this->authenticator->getConfig();
         $url = $fronteggConfig->getServiceUrl(
-            Config::SERVICE_AUDITS
+            Config::AUDITS_SERVICE
         );
         $headers = [
             'Content-Type' => 'application/json',

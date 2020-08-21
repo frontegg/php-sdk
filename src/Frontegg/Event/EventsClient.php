@@ -76,7 +76,7 @@ class EventsClient
             ->getValue();
         $fronteggConfig = $this->authenticator->getConfig();
         $url = $fronteggConfig->getServiceUrl(
-            Config::SERVICE_EVENTS
+            Config::EVENTS_SERVICE
         );
         $headers = [
             'Content-Type' => 'application/json',
