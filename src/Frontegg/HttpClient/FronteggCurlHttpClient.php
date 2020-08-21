@@ -138,6 +138,8 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
         $return = [];
 
         foreach ($headers as $key => $value) {
+            $value = is_array($value) ? ($value[0] ?? '') : $value;
+
             $return[] = $key . ': ' . $value;
         }
 

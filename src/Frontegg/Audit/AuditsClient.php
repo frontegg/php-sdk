@@ -74,6 +74,9 @@ class AuditsClient
         ...$filters
     ): array {
         $this->authenticator->validateAuthentication();
+        if (!$this->authenticator->getAccessToken()) {
+            throw new AuthenticationException('Authentication problem');
+        }
 
         // @todo: Refactor this.
 
@@ -153,6 +156,9 @@ class AuditsClient
         }
 
         $this->authenticator->validateAuthentication();
+        if (!$this->authenticator->getAccessToken()) {
+            throw new AuthenticationException('Authentication problem');
+        }
 
         // @todo: Refactor this.
 

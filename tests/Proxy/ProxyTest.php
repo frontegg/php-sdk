@@ -9,6 +9,7 @@ use Frontegg\Proxy\Adapter\FronteggHttpClient\FronteggAdapter;
 use Frontegg\Proxy\Proxy;
 use Frontegg\Tests\Helper\ProxyTestCaseHelper;
 use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
 
 class ProxyTest extends ProxyTestCaseHelper
 {
@@ -19,9 +20,16 @@ class ProxyTest extends ProxyTestCaseHelper
     {
         // Arrange
         $httpClient = $this->createFronteggCurlHttpClientStub();
+        $contextResolver = function(RequestInterface $request) {
+            return [
+                'tenantId' => 'THE-TENANT-ID',
+                'userId' => 'test-user-id',
+                'permissions' => [],
+            ];
+        };
 
         // Act
-        $object = $this->createFronteggProxy($httpClient);
+        $object = $this->createFronteggProxy($httpClient, $contextResolver);
 
         // Assert
         $this->assertInstanceOf(Proxy::class, $object);
@@ -51,14 +59,21 @@ class ProxyTest extends ProxyTestCaseHelper
         $httpClient = $this->createFronteggCurlHttpClientStub(
             [$authResponse, $apiResponse]
         );
-        $object = $this->createFronteggProxy($httpClient);
+        $contextResolver = function(RequestInterface $request) {
+            return [
+                'tenantId' => 'THE-TENANT-ID',
+                'userId' => 'test-user-id',
+                'permissions' => [],
+            ];
+        };
+
+        $object = $this->createFronteggProxy($httpClient, $contextResolver);
         $request = new Request('GET', 'https://google.com');
 
         // Act
         /** @var ApiRawResponse $response */
         $response = $object->forward($request)
             ->to('https://dev-api.frontegg.com/frontegg');
-        var_dump($response);
 
         // Assert
         $this->assertInstanceOf(ApiRawResponse::class, $response);

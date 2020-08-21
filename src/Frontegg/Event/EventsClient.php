@@ -6,6 +6,7 @@ use Frontegg\Authenticator\ApiError;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Event\Type\TriggerOptionsInterface;
+use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\EventTriggerException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
@@ -63,6 +64,9 @@ class EventsClient
         }
 
         $this->authenticator->validateAuthentication();
+        if (!$this->authenticator->getAccessToken()) {
+            throw new AuthenticationException('Authentication problem');
+        }
 
         // @todo: Refactor this.
 
@@ -123,7 +127,6 @@ class EventsClient
             $response->getBody()
         );
 
-        var_dump($errorDecoded);
         $this->apiError = new ApiError(
             $errorDecoded['error'] ?? '',
             $errorDecoded['message'] ? print_r($errorDecoded['message'], true) : '',

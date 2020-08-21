@@ -3,11 +3,18 @@
 namespace Frontegg\Proxy;
 
 use Frontegg\Authenticator\Authenticator;
+use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\UnexpectedValueException;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\Http\Uri;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use Frontegg\Proxy\Adapter\AdapterInterface;
+use Frontegg\Proxy\Filters\FilterInterface;
+use Frontegg\Proxy\Filters\FronteggRequestAuthHeaderResolver;
+use Frontegg\Proxy\Filters\FronteggRequestHeaderResolver;
+use Frontegg\Proxy\Filters\FronteggRequestMethodResolver;
+use Frontegg\Proxy\Filters\FronteggSendRequestResolver;
+use Frontegg\Proxy\Filters\FronteggResponseHeaderResolver;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -31,34 +38,41 @@ class Proxy
     protected $adapter;
 
     /**
+     * @var callable
+     */
+    protected $context;
+
+    /**
      * @var callable[]
      */
     protected $filters = [];
 
     /**
-     * @TODO: Refactor this later.
-     *
      * Proxy constructor.
      *
      * @param Authenticator $authenticator
      * @param AdapterInterface $adapter
+     * @param callable $context
      */
     public function __construct(
         Authenticator $authenticator,
-        AdapterInterface $adapter
+        AdapterInterface $adapter,
+        callable $context
     ) {
         $this->authenticator = $authenticator;
         $this->adapter = $adapter;
+        $this->context = $context;
+
+        $this->filters = $this->getDefaultFilters();
     }
 
-
     /**
-     * Prepare the proxy to forward a request instance.
+     * Prepares the proxy to forward a request instance.
      *
      * @param RequestInterface $request
      * @return $this
      */
-    public function forward(RequestInterface $request)
+    public function forward(RequestInterface $request): self
     {
         $this->request = $request;
 
@@ -66,7 +80,7 @@ class Proxy
     }
 
     /**
-     * Forward the request to the target url and return the response.
+     * Forwards the request to the target url and return the response.
      *
      * @param string $target
      *
@@ -80,6 +94,11 @@ class Proxy
             throw new UnexpectedValueException('Missing request instance.');
         }
 
+        $this->authenticator->validateAuthentication();
+        if (!$this->authenticator->getAccessToken()) {
+            throw new AuthenticationException('Authentication problem');
+        }
+
         $target = new Uri($target);
 
         // Overwrite target scheme, host and port.
@@ -89,21 +108,14 @@ class Proxy
             ->withPort($target->getPort());
 
         // Check for subdirectory.
-        if ($path = $target->getPath()) {
-            $uri = $uri->withPath(rtrim($path, '/') . '/' . ltrim($uri->getPath(), '/'));
-        }
+        // @TODO: Check this
+//        if ($path = $target->getPath()) {
+//            $uri = $uri->withPath(rtrim($path, '/') . '/' . ltrim($uri->getPath(), '/'));
+//        }
 
         $request = $this->request->withUri($uri);
 
-        $stack = $this->filters;
-
-        $stack[] = function (RequestInterface $request, ResponseInterface $response, callable $next) {
-            $response = $this->adapter->send($request);
-
-            return $next($request, $response);
-        };
-
-        $relay = (new RelayBuilder())->newInstance($stack);
+        $relay = (new RelayBuilder())->newInstance($this->filters);
 
         $response = $relay($request, new Response());
 
@@ -122,14 +134,6 @@ class Proxy
     }
 
     /**
-     * @return FronteggHttpClientInterface
-     */
-    protected function getHttpClient(): FronteggHttpClientInterface
-    {
-        return $this->getAuthenticator()->getClient();
-    }
-
-    /**
      * @TODO: Refactor this later.
      *
      * @param ResponseInterface $response
@@ -140,8 +144,29 @@ class Proxy
     {
         return new ApiRawResponse(
             $response->getHeaders(),
-            $response->getBody(),
+            $response->getBody()->getContents(),
             $response->getStatusCode()
         );
+    }
+
+    /**
+     * Returns default filters list.
+     *
+     * @return FilterInterface[]
+     */
+    protected function getDefaultFilters(): array
+    {
+        return [
+            new FronteggRequestAuthHeaderResolver(
+                $this->authenticator,
+                $this->context
+            ),
+            new FronteggRequestHeaderResolver(),
+            new FronteggRequestMethodResolver(),
+            new FronteggSendRequestResolver(
+                $this->adapter
+            ),
+            new FronteggResponseHeaderResolver(),
+        ];
     }
 }

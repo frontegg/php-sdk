@@ -14,7 +14,7 @@ interface FronteggHttpClientInterface
     /**
      * @var int The default timeout for CURL connection
      */
-    public const DEFAULT_TIMEOUT = 60;
+    public const DEFAULT_TIMEOUT = 10;
 
     /**
      * @TODO: Refactor this to use Request and Response interfaces from the PSR.

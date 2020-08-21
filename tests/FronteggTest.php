@@ -11,6 +11,7 @@ use Frontegg\Event\Type\TriggerOptions;
 use Frontegg\Event\Type\WebHookBody;
 use Frontegg\Frontegg;
 use Frontegg\Http\ApiRawResponse;
+use Frontegg\Http\RequestInterface;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use Frontegg\Tests\Helper\AuthenticatorTestCaseHelper;
 
@@ -27,6 +28,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
         $config = [
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
@@ -65,6 +69,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
             'httpClientHandler' => $httpClient,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
@@ -111,6 +118,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
             'httpClientHandler' => $httpClient,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
@@ -152,6 +162,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
             'httpClientHandler' => $httpClient,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 

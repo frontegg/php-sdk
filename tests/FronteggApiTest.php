@@ -9,6 +9,7 @@ use Frontegg\Event\Type\DefaultProperties;
 use Frontegg\Event\Type\TriggerOptions;
 use Frontegg\Event\Type\WebHookBody;
 use Frontegg\Frontegg;
+use Frontegg\Http\RequestInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -44,6 +45,9 @@ class FronteggApiTest extends TestCase
             'clientId' => self::CLIENT_ID,
             'clientSecret' => self::API_KEY,
             'apiBaseUrl' => self::API_BASE_URL,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $this->fronteggClient = new Frontegg($config);
     }

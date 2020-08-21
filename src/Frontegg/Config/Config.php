@@ -59,23 +59,55 @@ class Config
     protected $urls;
 
     /**
+     * @var callable
+     */
+    protected $contextResolver;
+
+    /**
+     * @var bool
+     */
+    protected $disableCors;
+
+    /**
      * Config constructor.
      *
      * @param string $clientId
      * @param string $clientSecret
      * @param string $baseUrl
-     * @param array  $urls
+     * @param array $urls
+     * @param bool $disableCors
+     * @param callable $contextResolver
      */
     public function __construct(
         string $clientId,
         string $clientSecret,
         string $baseUrl,
-        array $urls = []
+        array $urls,
+        bool $disableCors,
+        callable $contextResolver
     ) {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
         $this->baseUrl = trim($baseUrl, '/');
         $this->setApiUrls($urls);
+        $this->contextResolver = $contextResolver;
+        $this->disableCors = $disableCors;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getContextResolver(): callable
+    {
+        return $this->contextResolver;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDisableCors(): bool
+    {
+        return $this->disableCors;
     }
 
     /**
@@ -124,6 +156,16 @@ class Config
         }
 
         return $this->baseUrl . static::$API_URL_KEYS[$urlKey];
+    }
+
+    /**
+     * Returns URL of the Frontegg proxy.
+     *
+     * @return string
+     */
+    public function getProxyUrl(): string
+    {
+        return $this->baseUrl;
     }
 
     /**

@@ -11,8 +11,12 @@ use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
 use Frontegg\Exception\InvalidUrlConfigException;
+use Frontegg\Http\ApiRawResponse;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
+use Frontegg\Proxy\Adapter\FronteggHttpClient\FronteggAdapter;
+use Frontegg\Proxy\Proxy;
+use Psr\Http\Message\RequestInterface;
 
 class Frontegg
 {
@@ -73,6 +77,13 @@ class Frontegg
     protected $eventsClient;
 
     /**
+     * Frontegg proxy.
+     *
+     * @var Proxy
+     */
+    protected $proxy;
+
+    /**
      * Frontegg constructor.
      *
      * @param array $config
@@ -81,25 +92,38 @@ class Frontegg
      */
     public function __construct(array $config = [])
     {
-        $config = array_merge([
-            'clientId' => getenv(static::CLIENT_ID_ENV_NAME),
-            'clientSecret' => getenv(static::CLIENT_SECRET_ENV_NAME),
-            'apiBaseUrl' => static::DEFAULT_API_BASE_URL,
-            'apiUrls' => [],
-            'apiVersion' => static::DEFAULT_API_VERSION,
-            'httpClientHandler' => null,
-        ], $config);
+        $config = array_merge(
+            [
+                'clientId' => getenv(static::CLIENT_ID_ENV_NAME),
+                'clientSecret' => getenv(static::CLIENT_SECRET_ENV_NAME),
+                'apiBaseUrl' => static::DEFAULT_API_BASE_URL,
+                'apiUrls' => [],
+                'apiVersion' => static::DEFAULT_API_VERSION,
+                'httpClientHandler' => null,
+                'disableCors' => false,
+                'contextResolver' => null,
+            ],
+            $config
+        );
 
         if (!$config['clientId']) {
             throw new FronteggSDKException(
                 'Required "clientId" key not supplied in config and
-                could not find fallback environment variable "' . static::CLIENT_ID_ENV_NAME . '"'
+                could not find fallback environment variable "'
+                .static::CLIENT_ID_ENV_NAME.'"'
             );
         }
         if (!$config['clientSecret']) {
             throw new FronteggSDKException(
                 'Required "clientSecret" key not supplied in config and
-                could not find fallback environment variable "' . static::CLIENT_SECRET_ENV_NAME . '"'
+                could not find fallback environment variable "'
+                .static::CLIENT_SECRET_ENV_NAME.'"'
+            );
+        }
+        if (!is_callable($config['contextResolver'])) {
+            throw new FronteggSDKException(
+                'Required "contextResolver" key not supplied in config and
+                could not find fallback value'
             );
         }
 
@@ -107,14 +131,23 @@ class Frontegg
             $config['clientId'],
             $config['clientSecret'],
             $config['apiBaseUrl'],
-            $config['apiUrls']
+            $config['apiUrls'],
+            $config['disableCors'],
+            $config['contextResolver']
         );
-        $this->client = $config['httpClientHandler'] ?? new FronteggCurlHttpClient();
+        $this->client = $config['httpClientHandler'] ??
+            new FronteggCurlHttpClient();
 
         $this->authenticator = new Authenticator($this->config, $this->client);
         $this->auditsClient = new AuditsClient($this->authenticator);
         $this->eventsClient = new EventsClient($this->authenticator);
-        // @TODO: Instantiate Middleware, Notifications
+        $this->proxy = new Proxy(
+            $this->authenticator,
+            new FronteggAdapter($this->client),
+            // @TODO: Refactor this to use context resolver.
+            $this->config->getContextResolver()
+        );
+        // @TODO: Instantiate Notifications, etc.
     }
 
     /**
@@ -176,7 +209,7 @@ class Frontegg
      * @param int|null    $count
      * @param string|null $sortBy
      * @param string      $sortDirection
-     * @param mixed       $filters         Dynamic query params based on the metadata
+     * @param mixed       $filters Dynamic query params based on the metadata
      *
      * @throws Exception\AuthenticationException
      * @return array
@@ -206,7 +239,7 @@ class Frontegg
      * Returns created audit log data.
      *
      * @param string $tenantId
-     * @param array  $auditLog Audits parameters:
+     * @param array  $auditLog   Audits parameters:
      *                           user: string - User email
      *                           resource: string - Source of log event
      *                           action: string - Log event name
@@ -242,5 +275,20 @@ class Frontegg
     public function triggerEvent(TriggerOptionsInterface $triggerOptions): bool
     {
         return $this->eventsClient->trigger($triggerOptions);
+    }
+
+    /**
+     * Forwards the request to Frontegg API.
+     *
+     * @param RequestInterface $request
+     *
+     * @throws Exception\UnexpectedValueException
+     *
+     * @return ApiRawResponse
+     */
+    public function forward(RequestInterface $request): ApiRawResponse
+    {
+        return $this->proxy->forward($request)
+            ->to($this->config->getProxyUrl());
     }
 }

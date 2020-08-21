@@ -26,9 +26,21 @@ abstract class AuthenticatorTestCaseHelper extends TestCase
         string $clientId = 'clientTestID',
         string $clientSecret = 'apiTestSecretKey',
         string $baseUrl = 'http://test',
-        array $urls = []
+        array $urls = [],
+        bool $disbaleCors = true,
+        ?callable $contextResolver = null
     ): Authenticator {
-        $fronteggConfig = new Config($clientId, $clientSecret, $baseUrl, $urls);
+        $contextResolver = $contextResolver ?? function () {
+            return [];
+        };
+        $fronteggConfig = new Config(
+            $clientId,
+            $clientSecret,
+            $baseUrl,
+            $urls,
+            $disbaleCors,
+            $contextResolver
+        );
 
         return new Authenticator($fronteggConfig, $client);
     }

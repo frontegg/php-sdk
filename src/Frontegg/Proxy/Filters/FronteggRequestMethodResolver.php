@@ -8,7 +8,6 @@ use Psr\Http\Message\ResponseInterface;
 
 class FronteggRequestMethodResolver implements FilterInterface
 {
-
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
     {
         if ($request->getMethod() !== 'OPTIONS') {

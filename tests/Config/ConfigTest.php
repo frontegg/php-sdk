@@ -4,6 +4,7 @@ namespace Frontegg\Tests\Config;
 
 use Frontegg\Config\Config;
 use Frontegg\Exception\InvalidUrlConfigException;
+use Frontegg\Http\RequestInterface;
 use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends TestCase
@@ -17,7 +18,12 @@ class ConfigTest extends TestCase
         $config = new Config(
             'clientTestID',
             'apiTestSecretKey',
-            'https://api.frontegg.com/'
+            'https://api.frontegg.com/',
+            [],
+            false,
+            function (RequestInterface $request) {
+                return [];
+            }
         );
 
         // Assert
@@ -42,7 +48,11 @@ class ConfigTest extends TestCase
                 Config::SERVICE_AUDITS => '/audits',
                 Config::SERVICE_EVENTS => '/eventzz',
                 'randomUrl' => 'should not be in the config',
-            ]
+            ],
+            false,
+            function (RequestInterface $request) {
+                return [];
+            }
         );
 
         // Assert
@@ -58,6 +68,10 @@ class ConfigTest extends TestCase
         $this->assertEquals(
             'https://api.frontegg.com/eventzz',
             $config->getServiceUrl(Config::SERVICE_EVENTS)
+        );
+        $this->assertEquals(
+            'https://api.frontegg.com',
+            $config->getProxyUrl()
         );
         $this->expectException(InvalidUrlConfigException::class);
         $this->assertNotEquals(
@@ -78,7 +92,11 @@ class ConfigTest extends TestCase
             'clientTestID',
             'apiTestSecretKey',
             'https://api.frontegg.com/',
-            []
+            [],
+            false,
+            function (RequestInterface $request) {
+                return [];
+            }
         );
 
         // Assert
