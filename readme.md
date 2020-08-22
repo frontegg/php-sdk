@@ -168,8 +168,8 @@ use Frontegg\Events\Type\TriggerOptions;
 use Frontegg\Events\Type\WebHookBody;
 use Frontegg\Frontegg;
 
-$clientId = '6da27373-1572-444f-b3c5-ef702ce65123';
-$apikey = '0cf38799-1dae-488f-8dc8-a09b4c397ad5';
+$clientId = 'YOUR_CLIENT_ID';
+$apikey = 'YOUR_API_KEY';
 $config = [
     'clientId' => $clientId,
     'clientSecret' => $apikey,
@@ -179,7 +179,7 @@ $config = [
         Config::EVENTS_SERVICE => '/event/resources/triggers/v2',
     ],
 ];
-$tenantId = 'tacajob400@icanav.net';
+$tenantId = 'YOUR_TENANT_ID';
 
 $frontegg = new Frontegg($config);
 
@@ -193,7 +193,7 @@ $triggerOptions = new TriggerOptions(
     new ChannelsConfig(
         new WebHookBody([
                             'title' => 'Test title!',
-                        ])
+        ])
     ),
     $tenantId
 );
@@ -230,10 +230,10 @@ $request = new Request('GET', Config::PROXY_URL . '/audits?sortDirection=desc&so
 
 handleFronteggUri($request);
 
-function handleFronteggUri(RequestInterface $request): void
+function handleFronteggUri(RequestInterface $request)
 {
-    $clientId = '6da27373-1572-444f-b3c5-ef702ce65123';
-    $apikey = '0cf38799-1dae-488f-8dc8-a09b4c397ad5';
+    $clientId = 'YOUR_CLIENT_ID';
+    $apikey = 'YOUR_API_KEY';
     $tenantId = 'tacajob400@icanav.net';
     $config = [
         'clientId' => $clientId,
@@ -255,17 +255,6 @@ function handleFronteggUri(RequestInterface $request): void
     $frontegg = new Frontegg($config);
     $response = $frontegg->forward($request);
 
-    var_dump('--- Config:');
-//    var_dump($frontegg->getConfig());
-
-    var_dump('-------- Proxied response:');
-//    var_dump($response);
-    var_dump($response->getHttpResponseCode(), $response->getBody());
-
-    if ($response->getHttpResponseCode() === 200) {
-        print "\n\nSUCCESS";
-    } else {
-        print "\n\nFAILURE";
-    }
+    return $response->getBody(); 
 }
 ````
