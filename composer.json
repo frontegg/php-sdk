@@ -4,7 +4,7 @@
     "keywords": ["frontegg", "sdk"],
     "type": "library",
     "homepage": "https://github.com/frontegg/php-sdk",
-    "license": "MIT License",
+    "license": "MIT",
     "authors": [
         {
             "name": "Frontegg",
