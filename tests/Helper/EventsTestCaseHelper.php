@@ -2,7 +2,7 @@
 
 namespace Frontegg\Tests\Helper;
 
-use Frontegg\Event\EventsClient;
+use Frontegg\Events\EventsClient;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
 
 class EventsTestCaseHelper extends AuthenticatorTestCaseHelper

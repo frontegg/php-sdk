@@ -121,7 +121,12 @@ class ProxyTest extends ProxyTestCaseHelper
         };
 
         $object = $this->createFronteggProxy($httpClient, $contextResolver);
-        $request = new Request('POST', '/request-with-post-data');
+        $request = new Request(
+            'POST',
+            '/request-with-post-data',
+            [],
+            http_build_query(['field 1' => 'value 1', 'field 2' => 'value 2'])
+        );
 
         // Act
         /** @var ApiRawResponse $response */

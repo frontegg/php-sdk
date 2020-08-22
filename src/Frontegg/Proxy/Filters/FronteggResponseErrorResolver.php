@@ -7,6 +7,8 @@ use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
+use function GuzzleHttp\Psr7\stream_for;
+
 class FronteggResponseErrorResolver implements FilterInterface
 {
     protected const FRONTEGG_REQUEST_FAILED = 'Frontegg request failed';
@@ -44,14 +46,9 @@ class FronteggResponseErrorResolver implements FilterInterface
      */
     protected function setServerErrorToResponse(ResponseInterface $response): ResponseInterface
     {
-        $resource = fopen(
-            'data://text/plain;base64,' . base64_encode(
-                self::FRONTEGG_REQUEST_FAILED
-            ),
-            'r'
-        );
+        $stream = stream_for(self::FRONTEGG_REQUEST_FAILED);
 
-        return $response->withBody(new Stream($resource));
+        return $response->withBody($stream);
     }
 
     /**

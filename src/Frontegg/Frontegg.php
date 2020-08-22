@@ -2,11 +2,11 @@
 
 namespace Frontegg;
 
-use Frontegg\Audit\AuditsClient;
+use Frontegg\Audits\AuditsClient;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
-use Frontegg\Event\EventsClient;
-use Frontegg\Event\Type\TriggerOptionsInterface;
+use Frontegg\Events\EventsClient;
+use Frontegg\Events\Type\TriggerOptionsInterface;
 use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
