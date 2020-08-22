@@ -156,4 +156,116 @@ $auditsLog = $frontegg->getAudits(
 
 ### Events
 
-!!!!!TODO:!!!!!
+````php
+
+require_once './vendor/autoload.php';
+require_once './src/Frontegg/autoload.php';
+
+use Frontegg\Config\Config;
+use Frontegg\Events\Type\ChannelsConfig;
+use Frontegg\Events\Type\DefaultProperties;
+use Frontegg\Events\Type\TriggerOptions;
+use Frontegg\Events\Type\WebHookBody;
+use Frontegg\Frontegg;
+
+$clientId = '6da27373-1572-444f-b3c5-ef702ce65123';
+$apikey = '0cf38799-1dae-488f-8dc8-a09b4c397ad5';
+$config = [
+    'clientId' => $clientId,
+    'clientSecret' => $apikey,
+    'apiBaseUrl' => 'https://dev-api.frontegg.com/',
+    'apiUrls' => [
+        Config::AUTHENTICATION_SERVICE => '/auth/vendor',
+        Config::EVENTS_SERVICE => '/event/resources/triggers/v2',
+    ],
+];
+$tenantId = 'tacajob400@icanav.net';
+
+$frontegg = new Frontegg($config);
+
+
+$triggerOptions = new TriggerOptions(
+    'eventKeyForTest',
+    new DefaultProperties(
+        'Default title',
+        'Default description'
+    ),
+    new ChannelsConfig(
+        new WebHookBody([
+                            'title' => 'Test title!',
+                        ])
+    ),
+    $tenantId
+);
+$response = $frontegg->triggerEvent($triggerOptions);
+````
+
+### Middleware
+
+````php
+<?php
+
+require_once './vendor/autoload.php';
+require_once './src/Frontegg/autoload.php';
+
+use Frontegg\Config\Config;
+use Frontegg\Frontegg;
+use GuzzleHttp\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
+
+/**
+ * Setup routing rule for "/frontegg" URIs.
+ * Can be a part of middleware f.e. in Laravel.
+ */
+if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/frontegg') === 0) {
+    $request = new Request('POST', $_SERVER['REQUEST_URI']);
+
+    handleFronteggUri($request);
+}
+
+
+// DEBUG
+$request = new Request('GET', Config::PROXY_URL . '/audits?sortDirection=desc&sortBy=createdAt&filter=&offset=0&count=20');
+//$request = new Request('GET', Config::PROXY_URL . '/');
+
+handleFronteggUri($request);
+
+function handleFronteggUri(RequestInterface $request): void
+{
+    $clientId = '6da27373-1572-444f-b3c5-ef702ce65123';
+    $apikey = '0cf38799-1dae-488f-8dc8-a09b4c397ad5';
+    $tenantId = 'tacajob400@icanav.net';
+    $config = [
+        'clientId' => $clientId,
+        'clientSecret' => $apikey,
+        'apiBaseUrl' => 'https://dev-api.frontegg.com/',
+        'apiUrls' => [
+            Config::AUTHENTICATION_SERVICE => '/auth/vendor',
+        ],
+        'contextResolver' => function(RequestInterface $request) use ($tenantId) {
+            return [
+                'tenantId' => $tenantId,
+                'userId' => 'test-user-id',
+                'permissions' => [],
+            ];
+        },
+        'disableCors' => false,
+    ];
+
+    $frontegg = new Frontegg($config);
+    $response = $frontegg->forward($request);
+
+    var_dump('--- Config:');
+//    var_dump($frontegg->getConfig());
+
+    var_dump('-------- Proxied response:');
+//    var_dump($response);
+    var_dump($response->getHttpResponseCode(), $response->getBody());
+
+    if ($response->getHttpResponseCode() === 200) {
+        print "\n\nSUCCESS";
+    } else {
+        print "\n\nFAILURE";
+    }
+}
+````
