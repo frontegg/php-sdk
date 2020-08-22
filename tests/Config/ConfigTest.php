@@ -38,8 +38,9 @@ class ConfigTest extends TestCase
             'apiTestSecretKey',
             'https://api.frontegg.com/',
             [
-                Config::SERVICE_AUTHENTICATION => '/test/auth',
-                Config::SERVICE_AUDITS => '/audits',
+                Config::AUTHENTICATION_SERVICE => '/test/auth',
+                Config::AUDITS_SERVICE => '/audits',
+                Config::EVENTS_SERVICE => '/eventzz',
                 'randomUrl' => 'should not be in the config',
             ]
         );
@@ -48,11 +49,15 @@ class ConfigTest extends TestCase
         $this->assertEquals('https://api.frontegg.com', $config->getBaseUrl());
         $this->assertEquals(
             'https://api.frontegg.com/test/auth',
-            $config->getServiceUrl(Config::SERVICE_AUTHENTICATION)
+            $config->getServiceUrl(Config::AUTHENTICATION_SERVICE)
         );
         $this->assertEquals(
             'https://api.frontegg.com/audits',
-            $config->getServiceUrl(Config::SERVICE_AUDITS)
+            $config->getServiceUrl(Config::AUDITS_SERVICE)
+        );
+        $this->assertEquals(
+            'https://api.frontegg.com/eventzz',
+            $config->getServiceUrl(Config::EVENTS_SERVICE)
         );
         $this->expectException(InvalidUrlConfigException::class);
         $this->assertNotEquals(
@@ -78,8 +83,8 @@ class ConfigTest extends TestCase
 
         // Assert
         $this->assertEquals(
-            $config->getBaseUrl().Config::SERVICE_AUTHENTICATION_DEFAULT_URL,
-            $config->getServiceUrl(Config::SERVICE_AUTHENTICATION)
+            $config->getBaseUrl().Config::AUTHENTICATION_SERVICE_DEFAULT_URL,
+            $config->getServiceUrl(Config::AUTHENTICATION_SERVICE)
         );
         $this->expectException(InvalidUrlConfigException::class);
         $this->assertNotEquals(

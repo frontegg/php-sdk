@@ -2,7 +2,7 @@
 
 namespace Frontegg\Tests\Helper;
 
-use Frontegg\Audits\AuditsClient;
+use Frontegg\Audit\AuditsClient;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
 
 abstract class AuditsTestCaseHelper extends AuthenticatorTestCaseHelper

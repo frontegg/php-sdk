@@ -1,6 +1,6 @@
 <?php
 
-namespace Frontegg\Audits;
+namespace Frontegg\Audit;
 
 use Exception;
 use Frontegg\Authenticator\ApiError;
@@ -10,8 +10,8 @@ use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
 use Frontegg\Exception\InvalidUrlConfigException;
-use Frontegg\Http\Request;
-use Frontegg\Http\Response;
+use Frontegg\Http\RequestInterface;
+use Frontegg\Http\ResponseInterface;
 use JsonException;
 
 class AuditsClient
@@ -22,6 +22,11 @@ class AuditsClient
      * @var Authenticator
      */
     protected $authenticator;
+
+    /**
+     * @var ApiError|null
+     */
+    protected $apiError;
 
     /**
      * AuditsClient constructor.
@@ -78,7 +83,7 @@ class AuditsClient
             ->getValue();
         $fronteggConfig = $this->authenticator->getConfig();
         $url = $fronteggConfig->getServiceUrl(
-            Config::SERVICE_AUDITS
+            Config::AUDITS_SERVICE
         );
         $body = json_encode(
             array_merge(
@@ -101,13 +106,13 @@ class AuditsClient
 
         $lastResponse = $httpClient->send(
             $url,
-            Request::METHOD_GET,
+            RequestInterface::METHOD_GET,
             $body,
             $headers,
-            Request::HTTP_REQUEST_TIMEOUT
+            RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
-        if (Response::HTTP_STATUS_OK !== $lastResponse->getHttpResponseCode()) {
+        if (ResponseInterface::HTTP_STATUS_OK !== $lastResponse->getHttpResponseCode()) {
             throw new AuthenticationException($lastResponse->getBody());
         }
 
@@ -157,7 +162,7 @@ class AuditsClient
             ->getValue();
         $fronteggConfig = $this->authenticator->getConfig();
         $url = $fronteggConfig->getServiceUrl(
-            Config::SERVICE_AUDITS
+            Config::AUDITS_SERVICE
         );
         $headers = [
             'Content-Type' => 'application/json',
@@ -167,15 +172,15 @@ class AuditsClient
 
         $lastResponse = $httpClient->send(
             $url,
-            Request::METHOD_POST,
+            RequestInterface::METHOD_POST,
             json_encode($auditLog),
             $headers,
-            Request::HTTP_REQUEST_TIMEOUT
+            RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
         if (!in_array(
             $lastResponse->getHttpResponseCode(),
-            [Response::HTTP_STATUS_OK, Response::HTTP_STATUS_ACCEPTED]
+            [ResponseInterface::HTTP_STATUS_OK, ResponseInterface::HTTP_STATUS_ACCEPTED]
         )) {
             throw new AuthenticationException($lastResponse->getBody());
         }
@@ -219,5 +224,13 @@ class AuditsClient
         }
 
         return null;
+    }
+
+    /**
+     * @return ApiError|null
+     */
+    public function getApiError(): ?ApiError
+    {
+        return $this->apiError;
     }
 }

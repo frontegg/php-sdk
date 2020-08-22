@@ -2,9 +2,11 @@
 
 namespace Frontegg;
 
-use Frontegg\Audits\AuditsClient;
+use Frontegg\Audit\AuditsClient;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
+use Frontegg\Event\EventsClient;
+use Frontegg\Event\Type\TriggerOptionsInterface;
 use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
@@ -64,6 +66,13 @@ class Frontegg
     protected $auditsClient;
 
     /**
+     * Frontegg events client instance.
+     *
+     * @var EventsClient
+     */
+    protected $eventsClient;
+
+    /**
      * Frontegg constructor.
      *
      * @param array $config
@@ -104,7 +113,8 @@ class Frontegg
 
         $this->authenticator = new Authenticator($this->config, $this->client);
         $this->auditsClient = new AuditsClient($this->authenticator);
-        // @TODO: Instantiate Events, Middleware
+        $this->eventsClient = new EventsClient($this->authenticator);
+        // @TODO: Instantiate Middleware, Notifications
     }
 
     /**
@@ -129,6 +139,22 @@ class Frontegg
     public function getConfig(): Config
     {
         return $this->config;
+    }
+
+    /**
+     * @return AuditsClient
+     */
+    public function getAuditsClient(): AuditsClient
+    {
+        return $this->auditsClient;
+    }
+
+    /**
+     * @return EventsClient
+     */
+    public function getEventsClient(): EventsClient
+    {
+        return $this->eventsClient;
     }
 
     /**
@@ -197,5 +223,24 @@ class Frontegg
     public function sendAudit(string $tenantId, array $auditLog): array
     {
         return $this->auditsClient->sendAudit($tenantId, $auditLog);
+    }
+
+    /**
+     * Trigger the event specified by trigger options.
+     * Returns true on success.
+     * Returns true on failure and $apiError property will contain an error.
+     *
+     * @param TriggerOptionsInterface $triggerOptions
+     *
+     * @throws Exception\EventTriggerException
+     * @throws FronteggSDKException
+     * @throws InvalidParameterException
+     * @throws InvalidUrlConfigException
+     *
+     * @return bool
+     */
+    public function triggerEvent(TriggerOptionsInterface $triggerOptions): bool
+    {
+        return $this->eventsClient->trigger($triggerOptions);
     }
 }

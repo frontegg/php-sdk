@@ -5,8 +5,8 @@ namespace Frontegg\Authenticator;
 use DateTime;
 use Frontegg\Config\Config;
 use Frontegg\Http\ApiRawResponse;
-use Frontegg\Http\Request;
-use Frontegg\Http\Response;
+use Frontegg\Http\RequestInterface;
+use Frontegg\Http\ResponseInterface;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use JsonException;
 
@@ -104,7 +104,7 @@ class Authenticator
     public function authenticate(): void
     {
         $url = $this->fronteggConfig->getServiceUrl(
-            Config::SERVICE_AUTHENTICATION
+            Config::AUTHENTICATION_SERVICE
         );
         $body = json_encode(
             [
@@ -115,13 +115,13 @@ class Authenticator
 
         $this->lastResponse = $this->client->send(
             $url,
-            Request::METHOD_POST,
+            RequestInterface::METHOD_POST,
             $body,
             ['Content-Type' => 'application/json'],
-            Request::HTTP_REQUEST_TIMEOUT
+            RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
-        if (Response::HTTP_STATUS_OK
+        if (ResponseInterface::HTTP_STATUS_OK
             !== $this->lastResponse->getHttpResponseCode()
         ) {
             $this->setErrorFromResponseData();
@@ -197,7 +197,7 @@ class Authenticator
 
         $this->apiError = new ApiError(
             $errorDecoded['error'] ?? '',
-            $errorDecoded['message'] ?? '',
+            $errorDecoded['message'] ? print_r($errorDecoded['message'], true) : '',
             $errorDecoded['statusCode'] ?? null,
         );
         $this->accessToken = null;

@@ -11,11 +11,13 @@ use Frontegg\Exception\InvalidUrlConfigException;
  */
 class Config
 {
-    public const SERVICE_AUTHENTICATION = 'authentication';
-    public const SERVICE_AUDITS = 'audits';
+    public const AUTHENTICATION_SERVICE = 'authentication';
+    public const AUDITS_SERVICE = 'audits';
+    public const EVENTS_SERVICE = 'events';
 
-    public const SERVICE_AUTHENTICATION_DEFAULT_URL = '/auth/vendor';
-    public const SERVICE_AUDITS_DEFAULT_URL = '/audits';
+    public const AUTHENTICATION_SERVICE_DEFAULT_URL = '/auth/vendor';
+    public const AUDITS_SERVICE_DEFAULT_URL = '/audits';
+    public const EVENTS_SERVICE_DEFAULT_URL = '/event/resources/triggers/v2';
 
     /**
      * List of allowed API service URLs and its' default values.
@@ -23,8 +25,9 @@ class Config
      * @var string[]
      */
     protected static $API_URL_KEYS = [
-        self::SERVICE_AUTHENTICATION => self::SERVICE_AUTHENTICATION_DEFAULT_URL,
-        self::SERVICE_AUDITS => self::SERVICE_AUDITS_DEFAULT_URL,
+        self::AUTHENTICATION_SERVICE => self::AUTHENTICATION_SERVICE_DEFAULT_URL,
+        self::AUDITS_SERVICE => self::AUDITS_SERVICE_DEFAULT_URL,
+        self::EVENTS_SERVICE => self::EVENTS_SERVICE_DEFAULT_URL,
     ];
 
     /**
