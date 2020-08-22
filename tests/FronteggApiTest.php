@@ -4,12 +4,16 @@ namespace Frontegg\Tests;
 
 use Frontegg\Authenticator\AccessToken;
 use Frontegg\Authenticator\Authenticator;
-use Frontegg\Event\Type\ChannelsConfig;
-use Frontegg\Event\Type\DefaultProperties;
-use Frontegg\Event\Type\TriggerOptions;
-use Frontegg\Event\Type\WebHookBody;
+use Frontegg\Config\Config;
+use Frontegg\Events\Type\ChannelsConfig;
+use Frontegg\Events\Type\DefaultProperties;
+use Frontegg\Events\Type\TriggerOptions;
+use Frontegg\Events\Type\WebHookBody;
 use Frontegg\Frontegg;
+use Frontegg\Http\ApiRawResponse;
+use GuzzleHttp\Psr7\Request;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Class FronteggApiTest
@@ -44,6 +48,14 @@ class FronteggApiTest extends TestCase
             'clientId' => self::CLIENT_ID,
             'clientSecret' => self::API_KEY,
             'apiBaseUrl' => self::API_BASE_URL,
+            'contextResolver' => function (RequestInterface $request) {
+                return [
+                    'tenantId' => self::TENANT_ID,
+                    'userId' => 'test-user-id',
+                    'permissions' => [],
+                ];
+            },
+            'disableCors' => false,
         ];
         $this->fronteggClient = new Frontegg($config);
     }
@@ -75,6 +87,8 @@ class FronteggApiTest extends TestCase
      */
     public function testAuditsClientCanCreateAndGetThreeAuditLogs(): void
     {
+        // @TODO: Remove skipping the test later.
+        $this->markTestSkipped('Skip for now because of some data sorting error');
         // Arrange
         $auditsLogData = [
             [
@@ -130,8 +144,10 @@ class FronteggApiTest extends TestCase
     }
 
     /**
-     * @throws \Frontegg\Exception\AuthenticationException
+     * @throws \Frontegg\Exception\EventTriggerException
      * @throws \Frontegg\Exception\FronteggSDKException
+     * @throws \Frontegg\Exception\InvalidParameterException
+     * @throws \Frontegg\Exception\InvalidUrlConfigException
      *
      * @return void
      */
@@ -161,6 +177,64 @@ class FronteggApiTest extends TestCase
     }
 
     /**
+     * @throws \Frontegg\Exception\UnexpectedValueException
+     *
+     * @return void
+     */
+    public function testProxyCanForwardPostAuditLogs(): void
+    {
+        // Arrange
+        $auditLogData = [
+            'user' => 'testuser@t.com',
+            'resource' => 'Portal',
+            'action' => 'Login',
+            'severity' => 'Info',
+            'ip' => '123.1.2.3',
+        ];
+        $request = new Request(
+            'POST',
+            Config::PROXY_URL . '/audits',
+            [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ],
+            http_build_query($auditLogData)
+        );
+
+        // Act
+        $response = $this->fronteggClient->forward($request);
+
+
+        // Assert
+        $this->assertInstanceOf(ApiRawResponse::class, $response);
+        $this->assertContains($response->getHttpResponseCode(), [200, 202]);
+        $this->assertNotEmpty($response->getHeaders());
+        $this->assertJson($response->getBody());
+    }
+
+    /**
+     * @throws \Frontegg\Exception\UnexpectedValueException
+     *
+     * @return void
+     */
+    public function testProxyCanForwardGetAuditLogs(): void
+    {
+        // Arrange
+        $request = new Request(
+            'GET',
+            Config::PROXY_URL . '/audits?sortDirection=desc&sortBy=createdAt&filter=&offset=0&count=20'
+        );
+
+        // Act
+        $response = $this->fronteggClient->forward($request);
+
+        // Assert
+        $this->assertInstanceOf(ApiRawResponse::class, $response);
+        $this->assertEquals(200, $response->getHttpResponseCode());
+        $this->assertNotEmpty($response->getHeaders());
+        $this->assertJson($response->getBody());
+    }
+
+    /**
      * Assert that audit logs collection has the current audit log.
      *
      * @param array  $needle
@@ -172,9 +246,6 @@ class FronteggApiTest extends TestCase
         array $haystack,
         string $errorMessage = 'Audit logs "%2$s" should contain "%1$s"'
     ): void {
-        // @TODO: Remove skipping the test later.
-        $this->markTestSkipped('Skip for now because of some data sorting error');
-
         $auditLog = [
             'user' => $needle['user'],
             'resource' => $needle['resource'],

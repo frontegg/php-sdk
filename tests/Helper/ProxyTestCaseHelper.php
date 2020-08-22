@@ -2,35 +2,42 @@
 
 namespace Frontegg\Tests\Helper;
 
-use Frontegg\Audits\AuditsClient;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
+use Frontegg\Proxy\Adapter\FronteggHttpClient\FronteggAdapter;
+use Frontegg\Proxy\Proxy;
 
-abstract class AuditsTestCaseHelper extends AuthenticatorTestCaseHelper
+class ProxyTestCaseHelper extends AuthenticatorTestCaseHelper
 {
     /**
      * @param FronteggHttpClientInterface $client
+     * @param callable                    $contextResolver
      * @param string                      $clientId
      * @param string                      $clientSecret
      * @param string                      $baseUrl
      * @param array                       $urls
      *
-     * @return AuditsClient
+     * @return Proxy
      */
-    protected function createFronteggAuditsClient(
+    public function createFronteggProxy(
         FronteggHttpClientInterface $client,
+        callable $contextResolver,
         string $clientId = 'clientTestID',
         string $clientSecret = 'apiTestSecretKey',
         string $baseUrl = 'http://test',
-        array $urls = []
-    ): AuditsClient {
+        array $urls = [],
+        bool $disbaleCors = true
+    ): Proxy {
         $authenticator = $this->createFronteggAuthenticator(
             $client,
             $clientId,
             $clientSecret,
             $baseUrl,
-            $urls
+            $urls,
+            $disbaleCors,
+            $contextResolver
         );
+        $clientAdapter = new FronteggAdapter($client);
 
-        return new AuditsClient($authenticator);
+        return new Proxy($authenticator, $clientAdapter, $contextResolver);
     }
 }

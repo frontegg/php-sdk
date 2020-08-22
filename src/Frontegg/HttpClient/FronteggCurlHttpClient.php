@@ -45,15 +45,25 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
     }
 
     /**
+     * @TODO: Refactor this to use Request and Response interfaces from the PSR.
+     *
      * @inheritdoc
      */
-    public function send(string $url, string $method, string $body, array $headers, int $timeOut): ApiRawResponse
-    {
+    public function send(
+        string $url,
+        string $method,
+        string $body,
+        array $headers,
+        int $timeOut = self::DEFAULT_TIMEOUT
+    ): ApiRawResponse {
         $this->openConnection($url, $method, $body, $headers, $timeOut);
         $this->sendRequest();
 
         if ($curlErrorCode = $this->fronteggCurl->errno()) {
-            throw new FronteggSDKException($this->fronteggCurl->error(), $curlErrorCode);
+            throw new FronteggSDKException(
+                $this->fronteggCurl->error(),
+                $curlErrorCode
+            );
         }
 
         // Separate the raw headers from the raw body
@@ -73,8 +83,13 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
      * @param array  $headers The request headers.
      * @param int    $timeOut The timeout in seconds for the request.
      */
-    public function openConnection(string $url, string $method, string $body, array $headers, int $timeOut)
-    {
+    public function openConnection(
+        string $url,
+        string $method,
+        string $body,
+        array $headers,
+        int $timeOut = 60
+    ) {
         $options = [
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $this->compileRequestHeaders($headers),
@@ -123,6 +138,8 @@ class FronteggCurlHttpClient implements FronteggHttpClientInterface
         $return = [];
 
         foreach ($headers as $key => $value) {
+            $value = is_array($value) ? ($value[0] ?? '') : $value;
+
             $return[] = $key . ': ' . $value;
         }
 

@@ -2,12 +2,20 @@
 
 namespace Frontegg\Tests\Helper;
 
-use Frontegg\Event\EventsClient;
+use Frontegg\Events\EventsClient;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
 
 class EventsTestCaseHelper extends AuthenticatorTestCaseHelper
 {
-
+    /**
+     * @param FronteggCurlHttpClient $client
+     * @param string                 $clientId
+     * @param string                 $clientSecret
+     * @param string                 $baseUrl
+     * @param array                  $urls
+     *
+     * @return EventsClient
+     */
     public function createFronteggEventsClient(
         FronteggCurlHttpClient $client,
         string $clientId = 'clientTestID',

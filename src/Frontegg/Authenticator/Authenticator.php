@@ -121,7 +121,8 @@ class Authenticator
             RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
-        if (ResponseInterface::HTTP_STATUS_OK
+        if (
+            ResponseInterface::HTTP_STATUS_OK
             !== $this->lastResponse->getHttpResponseCode()
         ) {
             $this->setErrorFromResponseData();
@@ -159,7 +160,8 @@ class Authenticator
             $this->lastResponse->getBody()
         );
 
-        if (!$responseBodyDecoded
+        if (
+            !$responseBodyDecoded
             || !isset($responseBodyDecoded['token'])
             || !isset($responseBodyDecoded['expiresIn'])
         ) {

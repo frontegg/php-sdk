@@ -5,12 +5,13 @@ namespace Frontegg\Tests;
 use Frontegg\Authenticator\AccessToken;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
-use Frontegg\Event\Type\ChannelsConfig;
-use Frontegg\Event\Type\DefaultProperties;
-use Frontegg\Event\Type\TriggerOptions;
-use Frontegg\Event\Type\WebHookBody;
+use Frontegg\Events\Type\ChannelsConfig;
+use Frontegg\Events\Type\DefaultProperties;
+use Frontegg\Events\Type\TriggerOptions;
+use Frontegg\Events\Type\WebHookBody;
 use Frontegg\Frontegg;
 use Frontegg\Http\ApiRawResponse;
+use Frontegg\Http\RequestInterface;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
 use Frontegg\Tests\Helper\AuthenticatorTestCaseHelper;
 
@@ -27,6 +28,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
         $config = [
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
@@ -65,6 +69,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
             'httpClientHandler' => $httpClient,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
@@ -111,6 +118,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
             'httpClientHandler' => $httpClient,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
@@ -152,6 +162,9 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'clientId' => 'clientTestID',
             'clientSecret' => 'apiTestSecretKey',
             'httpClientHandler' => $httpClient,
+            'contextResolver' => function (RequestInterface $request) {
+                return [];
+            }
         ];
         $frontegg = new Frontegg($config);
 
