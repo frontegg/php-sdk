@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class FronteggResponseErrorResolver implements FilterInterface
 {
-    const FRONTEGG_REQUEST_FAILED = 'Frontegg request failed';
+    protected const FRONTEGG_REQUEST_FAILED = 'Frontegg request failed';
 
     public function __invoke(
         RequestInterface $request,
@@ -19,10 +19,12 @@ class FronteggResponseErrorResolver implements FilterInterface
         /** @var ResponseInterface $response */
         $response = $next($request, $response);
 
-        if (in_array(
-            $response->getStatusCode(),
-            $this->getSuccessHttpStatuses()
-        )) {
+        if (
+            in_array(
+                $response->getStatusCode(),
+                $this->getSuccessHttpStatuses()
+            )
+        ) {
             return $response;
         }
 
@@ -36,14 +38,14 @@ class FronteggResponseErrorResolver implements FilterInterface
     }
 
     /**
-     * @param $response
+     * @param ResponseInterface $response
      *
      * @return ResponseInterface
      */
-    protected function setServerErrorToResponse($response): ResponseInterface
+    protected function setServerErrorToResponse(ResponseInterface $response): ResponseInterface
     {
         $resource = fopen(
-            'data://text/plain;base64,'.base64_encode(
+            'data://text/plain;base64,' . base64_encode(
                 self::FRONTEGG_REQUEST_FAILED
             ),
             'r'

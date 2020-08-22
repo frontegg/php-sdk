@@ -94,7 +94,7 @@ class FronteggResponseHeaderResolver implements FilterInterface
             );
             $response = $response->withHeader(
                 static::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS,
-                true
+                'true'
             );
         }
 

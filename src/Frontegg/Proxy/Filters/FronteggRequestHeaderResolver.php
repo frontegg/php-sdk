@@ -11,7 +11,10 @@ class FronteggRequestHeaderResolver implements FilterInterface
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
     {
-        if (!$request->getBody() || $request->getHeader('Content-Type') === 'application/json') {
+        if (
+            !$request->getBody()->getContents()
+            || in_array('application/json', $request->getHeader('Content-Type'))
+        ) {
             return $next($request, $response);
         }
 
@@ -19,7 +22,7 @@ class FronteggRequestHeaderResolver implements FilterInterface
         // we need to change to application/json
         $request = $request->withHeader('Content-Type', 'application/json');
 
-        if ($request->getHeader('Content-Type') === 'application/x-www-form-urlencoded') {
+        if (in_array('application/x-www-form-urlencoded', $request->getHeader('Content-Type'))) {
             $request = $this->setJsonDataToRequestBody($request);
         }
 
@@ -35,7 +38,7 @@ class FronteggRequestHeaderResolver implements FilterInterface
     {
         $data = urldecode($request->getBody()->getContents());
         $resource = fopen(
-            'data://text/plain;base64,'.base64_encode(
+            'data://text/plain;base64,' . base64_encode(
                 json_encode($data)
             ),
             'r'

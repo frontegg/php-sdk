@@ -54,7 +54,15 @@ class ProxyTest extends ProxyTestCaseHelper
             ['Content-type' => 'application/json'],
             '{
                 "data":[
-                    {"title":"Default title","severity":"Info","tenantId":"tacajob400@icanav.net","vendorId":"6da27373-1572-444f-b3c5-ef702ce65123","createdAt":"2020-08-22 06:47:25.025","description":"Default description","frontegg_id":"6eacf416-67e2-4760-85d7-9ab90a18a945"}
+                    {
+                        "title":"Default title",
+                        "severity":"Info",
+                        "tenantId":"tacajob400@icanav.net",
+                        "vendorId":"6da27373-1572-444f-b3c5-ef702ce65123",
+                        "createdAt":"2020-08-22 06:47:25.025",
+                        "description":"Default description",
+                        "frontegg_id":"6eacf416-67e2-4760-85d7-9ab90a18a945"
+                    }
                 ]
             }',
             200
@@ -91,8 +99,7 @@ class ProxyTest extends ProxyTestCaseHelper
     /**
      * @return void
      */
-    public function testProxyShouldForwardPostRequestWithUrlEncodedDataToFronteggApi(
-    ): void
+    public function testProxyShouldForwardPostRequestWithUrlEncodedDataToFronteggApi(): void
     {
         // Arrange
         $authResponse = $this->createAuthHttpApiRawResponse();

@@ -288,7 +288,8 @@ class Uri implements UriInterface
     public static function isDefaultPort(UriInterface $uri)
     {
         return $uri->getPort() === null
-            || (isset(self::$defaultPorts[$uri->getScheme()]) && $uri->getPort() === self::$defaultPorts[$uri->getScheme()]);
+            || (isset(self::$defaultPorts[$uri->getScheme()])
+            && $uri->getPort() === self::$defaultPorts[$uri->getScheme()]);
     }
 
     /**

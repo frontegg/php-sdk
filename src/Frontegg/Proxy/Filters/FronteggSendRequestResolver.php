@@ -49,10 +49,12 @@ class FronteggSendRequestResolver implements FilterInterface
         while ($retryCount <= static::MAX_RETRY_COUNT) {
             $response = $this->sendRequest($request);
 
-            if (in_array(
-                $response->getStatusCode(),
-                $this->getSuccessHttpStatuses()
-            )) {
+            if (
+                in_array(
+                    $response->getStatusCode(),
+                    $this->getSuccessHttpStatuses()
+                )
+            ) {
                 return $next($request, $response);
             }
 
