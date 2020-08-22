@@ -7,6 +7,15 @@ use Psr\Http\Message\ResponseInterface;
 
 class FronteggResponseHeaderResolver implements FilterInterface
 {
+    protected const HEADER_ACCESS_CONTROL_ALLOW_METHODS = 'access-control-allow-methods';
+    protected const HEADER_ACCESS_CONTROL_ALLOW_HEADERS = 'access-control-allow-headers';
+    protected const HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = 'access-control-allow-origin';
+    protected const HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS = 'access-control-allow-credentials';
+
+    protected const HEADER_ACCESS_CONTROL_REQUEST_METHOD = 'access-control-request-method';
+    protected const HEADER_ACCESS_CONTROL_REQUEST_HEADERS = 'access-control-request-headers';
+    protected const HEADER_ORIGIN = 'Origin';
+
     /**
      * Disable or enable CORS headers.
      *
@@ -34,14 +43,16 @@ class FronteggResponseHeaderResolver implements FilterInterface
 
         if ($this->disableCors) {
             $response = $response->withoutHeader(
-                'access-control-allow-methods'
+                static::HEADER_ACCESS_CONTROL_ALLOW_METHODS
             );
             $response = $response->withoutHeader(
-                'access-control-allow-headers'
+                static::HEADER_ACCESS_CONTROL_ALLOW_HEADERS
             );
-            $response = $response->withoutHeader('access-control-allow-origin');
             $response = $response->withoutHeader(
-                'access-control-allow-credentials'
+                static::HEADER_ACCESS_CONTROL_ALLOW_ORIGIN
+            );
+            $response = $response->withoutHeader(
+                static::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS
             );
 
             return $response;
@@ -53,7 +64,7 @@ class FronteggResponseHeaderResolver implements FilterInterface
     /**
      * Sets CORS headers if they were set in request.
      *
-     * @param RequestInterface  $request
+     * @param RequestInterface $request
      * @param ResponseInterface $response
      *
      * @return ResponseInterface
@@ -62,27 +73,27 @@ class FronteggResponseHeaderResolver implements FilterInterface
         RequestInterface $request,
         ResponseInterface $response
     ): ResponseInterface {
-        if ($request->hasHeader('access-control-request-method')) {
+        if ($request->hasHeader(static::HEADER_ACCESS_CONTROL_REQUEST_METHOD)) {
             $response = $response->withHeader(
-                'access-control-allow-methods',
-                $request->getHeader('access-control-request-method')
+                static::HEADER_ACCESS_CONTROL_ALLOW_METHODS,
+                $request->getHeader(static::HEADER_ACCESS_CONTROL_REQUEST_METHOD)
             );
         }
 
-        if ($request->hasHeader('access-control-request-headers')) {
+        if ($request->hasHeader(static::HEADER_ACCESS_CONTROL_REQUEST_HEADERS)) {
             $response = $response->withHeader(
-                'access-control-allow-headers',
-                $request->getHeader('access-control-request-headers')
+                static::HEADER_ACCESS_CONTROL_ALLOW_HEADERS,
+                $request->getHeader(static::HEADER_ACCESS_CONTROL_REQUEST_HEADERS)
             );
         }
 
-        if ($request->hasHeader('Origin')) {
+        if ($request->hasHeader(static::HEADER_ORIGIN)) {
             $response = $response->withHeader(
-                'access-control-allow-origin',
-                $request->getHeader('access-control-allow-methods')
+                static::HEADER_ACCESS_CONTROL_ALLOW_ORIGIN,
+                $request->getHeader(static::HEADER_ORIGIN)
             );
             $response = $response->withHeader(
-                'access-control-allow-credentials',
+                static::HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS,
                 true
             );
         }

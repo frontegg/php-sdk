@@ -2,6 +2,7 @@
 
 namespace Frontegg\Proxy\Filters;
 
+use Frontegg\Authenticator\Authenticator;
 use Frontegg\Proxy\Adapter\AdapterInterface;
 use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\RequestInterface;
@@ -10,6 +11,9 @@ use Frontegg\Http\ResponseInterface as FronteggResponseInterface;
 
 class FronteggSendRequestResolver implements FilterInterface
 {
+    /**
+     * Maximum count of resending the original request on response errors.
+     */
     protected const MAX_RETRY_COUNT = 3;
 
     /**
@@ -18,13 +22,22 @@ class FronteggSendRequestResolver implements FilterInterface
     protected $httpClientAdapter;
 
     /**
-     * FronteggResponseAuthCheckResolver constructor.
+     * @var Authenticator
+     */
+    protected $authenticator;
+
+    /**
+     * FronteggSendRequestResolver constructor.
      *
      * @param AdapterInterface $httpClientAdapter
+     * @param Authenticator    $authenticator
      */
-    public function __construct(AdapterInterface $httpClientAdapter)
-    {
+    public function __construct(
+        AdapterInterface $httpClientAdapter,
+        Authenticator $authenticator
+    ) {
         $this->httpClientAdapter = $httpClientAdapter;
+        $this->authenticator = $authenticator;
     }
 
     public function __invoke(
@@ -34,29 +47,21 @@ class FronteggSendRequestResolver implements FilterInterface
     ) {
         $retryCount = 0;
         while ($retryCount <= static::MAX_RETRY_COUNT) {
-//        var_dump($request->getUri(), $request->getMethod());
-//        var_dump($request->getHeaders());
             $response = $this->sendRequest($request);
-//        var_dump($response->getStatusCode());
-//        var_dump($response->getBody()->getContents());
-//        exit;
 
             if (in_array(
                 $response->getStatusCode(),
                 $this->getSuccessHttpStatuses()
-            )
-            ) {
+            )) {
                 return $next($request, $response);
+            }
+
+            if ($response->getStatusCode() === FronteggResponseInterface::HTTP_STATUS_UNAUTHORIZED) {
+                $this->authenticator->validateAuthentication();
             }
 
             $retryCount++;
         }
-
-        $response = $response->withStatus(
-            FronteggResponseInterface::HTTP_STATUS_INTERNAL_SERVER_ERROR
-        );
-        // @TODO: Set body to "Frontegg request failed".
-//        $response = $response->withBody(new Stream());
 
         return $next($request, $response);
     }

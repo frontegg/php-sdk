@@ -3,6 +3,7 @@
 namespace Frontegg\Proxy;
 
 use Frontegg\Authenticator\Authenticator;
+use Frontegg\Config\Config;
 use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\UnexpectedValueException;
 use Frontegg\Http\ApiRawResponse;
@@ -13,11 +14,13 @@ use Frontegg\Proxy\Filters\FilterInterface;
 use Frontegg\Proxy\Filters\FronteggRequestAuthHeaderResolver;
 use Frontegg\Proxy\Filters\FronteggRequestHeaderResolver;
 use Frontegg\Proxy\Filters\FronteggRequestMethodResolver;
+use Frontegg\Proxy\Filters\FronteggResponseErrorResolver;
 use Frontegg\Proxy\Filters\FronteggSendRequestResolver;
 use Frontegg\Proxy\Filters\FronteggResponseHeaderResolver;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 use Relay\RelayBuilder;
 
 class Proxy
@@ -67,53 +70,25 @@ class Proxy
     }
 
     /**
-     * Prepares the proxy to forward a request instance.
+     * Forwards the request to the target Frontegg API url and returns the response.
      *
      * @param RequestInterface $request
-     * @return $this
-     */
-    public function forward(RequestInterface $request): self
-    {
-        $this->request = $request;
-
-        return $this;
-    }
-
-    /**
-     * Forwards the request to the target url and return the response.
+     * @param string           $target
      *
-     * @param string $target
-     *
-     * @throws UnexpectedValueException
+     * @throws AuthenticationException
      *
      * @return ApiRawResponse
      */
-    public function to(string $target): ApiRawResponse
+    public function forwardTo(RequestInterface $request, string $target): ApiRawResponse
     {
-        if ($this->request === null) {
-            throw new UnexpectedValueException('Missing request instance.');
-        }
+        $this->request = $request;
 
         $this->authenticator->validateAuthentication();
         if (!$this->authenticator->getAccessToken()) {
             throw new AuthenticationException('Authentication problem');
         }
 
-        $target = new Uri($target);
-
-        // Overwrite target scheme, host and port.
-        $uri = $this->request->getUri()
-            ->withScheme($target->getScheme())
-            ->withHost($target->getHost())
-            ->withPort($target->getPort());
-
-        // Check for subdirectory.
-        // @TODO: Check this
-//        if ($path = $target->getPath()) {
-//            $uri = $uri->withPath(rtrim($path, '/') . '/' . ltrim($uri->getPath(), '/'));
-//        }
-
-        $request = $this->request->withUri($uri);
+        $request = $this->getOverridenRequest($target);
 
         $relay = (new RelayBuilder())->newInstance($this->filters);
 
@@ -123,6 +98,55 @@ class Proxy
         $apiRawResponse = $this->getAdaptedApiRawResponse($response);
 
         return $apiRawResponse;
+    }
+
+    /**
+     * Overwrite request target scheme, host and port.
+     *
+     * @param string $target
+     *
+     * @return UriInterface
+     */
+    protected function getOverridenRequestUri(string $target): UriInterface
+    {
+        $target = new Uri($target);
+
+        return $this->request->getUri()
+            ->withScheme($target->getScheme())
+            ->withHost($target->getHost())
+            ->withPort($target->getPort());
+    }
+
+    /**
+     * Sanitize the Frontegg proxy URI prefix from the request URI.
+     *
+     * @param UriInterface $uri
+     *
+     * @return UriInterface
+     */
+    protected function sanitizeFronteggProxyPathFromRequestUri(UriInterface $uri): UriInterface
+    {
+        $uriPath = $uri->getPath();
+        if (strpos($uriPath, Config::PROXY_URL) !== 0) {
+            return $uri;
+        }
+
+        return $uri->withPath(substr($uriPath, strlen(Config::PROXY_URL)));
+    }
+
+    /**
+     * Returns request with overriden and sanitized URI.
+     *
+     * @param string $target
+     *
+     * @return RequestInterface
+     */
+    protected function getOverridenRequest(string $target): RequestInterface
+    {
+        $uri = $this->getOverridenRequestUri($target);
+        $uri = $this->sanitizeFronteggProxyPathFromRequestUri($uri);
+
+        return $this->request->withUri($uri);
     }
 
     /**
@@ -164,9 +188,11 @@ class Proxy
             new FronteggRequestHeaderResolver(),
             new FronteggRequestMethodResolver(),
             new FronteggSendRequestResolver(
-                $this->adapter
+                $this->adapter,
+                $this->authenticator
             ),
             new FronteggResponseHeaderResolver(),
+            new FronteggResponseErrorResolver()
         ];
     }
 }

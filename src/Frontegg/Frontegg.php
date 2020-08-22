@@ -288,7 +288,6 @@ class Frontegg
      */
     public function forward(RequestInterface $request): ApiRawResponse
     {
-        return $this->proxy->forward($request)
-            ->to($this->config->getProxyUrl());
+        return $this->proxy->forwardTo($request, $this->config->getProxyUrl());
     }
 }

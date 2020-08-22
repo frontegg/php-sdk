@@ -11,6 +11,8 @@ use Frontegg\Exception\InvalidUrlConfigException;
  */
 class Config
 {
+    public const PROXY_URL = '/frontegg';
+
     public const AUTHENTICATION_SERVICE = 'authentication';
     public const AUDITS_SERVICE = 'audits';
     public const EVENTS_SERVICE = 'events';
