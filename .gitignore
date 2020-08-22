@@ -1,0 +1,7 @@
+.idea/
+/vendor/
+composer.lock
+test-authenticator.php
+test-audits.php
+test-events.php
+test-proxy.php
