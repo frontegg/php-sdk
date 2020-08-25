@@ -28,10 +28,18 @@ require_once './vendor/autoload.php';
 require_once './src/Frontegg/autoload.php';
 
 use Frontegg\Frontegg;
+use Psr\Http\Message\RequestInterface;
 
 $config = [
     'clientId' => 'YOUR_CLIENT_ID',
     'clientSecret' => 'YOUR_SECRET_API_KEY',
+    'contextResolver' => function(RequestInterface $request) {
+        return [
+            'tenantId' => 'THE-TENANT-ID',
+            'userId' => 'test-user-id',
+            'permissions' => [],
+        ];
+    },
 ];
 
 $frontegg = new Frontegg($config);
@@ -48,6 +56,7 @@ require_once './src/Frontegg/autoload.php';
 
 use Frontegg\Frontegg;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
+use Psr\Http\Message\RequestInterface;
 
 $config = [
     'clientId' => 'YOUR_CLIENT_ID',
@@ -57,7 +66,14 @@ $config = [
         'authentication' => '/auth/vendor',
         'audits' => '/audits',
     ],
-    'apiVersion' => 'v1', // Not used yet. Coming soon.
+    'contextResolver' => function(RequestInterface $request) {
+        return [
+            'tenantId' => 'THE-TENANT-ID',
+            'userId' => 'test-user-id',
+            'permissions' => [],
+        ];
+    },
+    'disableCors' => false, // You can enable/disable CORS headers for Middleware Proxy.
     'httpClientHandler' => new FronteggCurlHttpClient(), // You can provide custom HTTP client.
 ];
 
@@ -71,8 +87,10 @@ $frontegg->init();
 |-------------------|:---:|:---:|---|
 | **clientId**      | string | None | Client Id. Required |
 | **clientSecret**  | string | None | API Key. Required |
+| **contextResolver**   | callable | None | Callback to provide context info. Required |
 | apiBaseUrl        | string | https://api.frontegg.com | Base API URL |
-| apiUrls           | array | | List of URLs of the API services |
+| apiUrls           | array | [] | List of URLs of the API services |
+| disableCors       | bool | false | Disabling CORS headers for Middleware Proxy |
 | httpClientHandler | special interface* | Curl client** | Custom HTTP client |
 | *apiVersion*      | string | 'v1' | **Not used yet.** API version |
 
@@ -84,7 +102,7 @@ $frontegg->init();
 
 Let your customers record the events, activities and changes made to their tenant.
 
-Frontegg’s Managed Audit Logs feature allows a SaaS company to embed an end-to-end working feature in just 5 lines of code.
+Frontegg’s Managed Audit Logs feature allows a SaaS company to embed an end-to-end working feature in just several lines of code.
 
 #### Sending audits
 
@@ -96,6 +114,7 @@ require_once './src/Frontegg/autoload.php';
 
 use Frontegg\Frontegg;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
+use Psr\Http\Message\RequestInterface;
 
 $config = [
     'clientId' => 'YOUR_CLIENT_ID',
@@ -105,8 +124,16 @@ $config = [
         'authentication' => '/auth/vendor',
         'audits' => '/audits',
     ],
-    'apiVersion' => 'v1', // Not used yet. Coming soon.
+    'contextResolver' => function(RequestInterface $request) {
+        return [
+            'tenantId' => 'THE-TENANT-ID',
+            'userId' => 'test-user-id',
+            'permissions' => [],
+        ];
+    },
+    'disableCors' => false, // You can enable/disable CORS headers for Middleware Proxy.
     'httpClientHandler' => new FronteggCurlHttpClient(), // You can provide custom HTTP client.
+    'apiVersion' => 'v1', // Not used yet. Coming soon.
 ];
 
 $frontegg = new Frontegg($config);
@@ -129,16 +156,23 @@ require_once './src/Frontegg/autoload.php';
 
 use Frontegg\Frontegg;
 use Frontegg\HttpClient\FronteggCurlHttpClient;
+use Psr\Http\Message\RequestInterface;
 
 $config = [
     'clientId' => 'YOUR_CLIENT_ID',
     'clientSecret' => 'YOUR_SECRET_API_KEY',
+    'contextResolver' => function(RequestInterface $request) {
+        return [
+            'tenantId' => 'THE-TENANT-ID',
+            'userId' => 'test-user-id',
+            'permissions' => [],
+        ];
+    },
     'apiBaseUrl' => 'https://api.frontegg.com/',
     'apiUrls' => [
         'authentication' => '/auth/vendor',
         'audits' => '/audits',
     ],
-    'apiVersion' => 'v1', // Not used yet. Coming soon.
     'httpClientHandler' => new FronteggCurlHttpClient(), // You can provide custom HTTP client.
 ];
 
@@ -156,33 +190,35 @@ $auditsLog = $frontegg->getAudits(
 
 ### Events
 
+Events triggering is easy and maximum configurable for different notification channels.
+
 ````php
 
 require_once './vendor/autoload.php';
 require_once './src/Frontegg/autoload.php';
 
-use Frontegg\Config\Config;
 use Frontegg\Events\Type\ChannelsConfig;
 use Frontegg\Events\Type\DefaultProperties;
 use Frontegg\Events\Type\TriggerOptions;
 use Frontegg\Events\Type\WebHookBody;
 use Frontegg\Frontegg;
+use Psr\Http\Message\RequestInterface;
 
 $clientId = 'YOUR_CLIENT_ID';
 $apikey = 'YOUR_API_KEY';
 $config = [
     'clientId' => $clientId,
     'clientSecret' => $apikey,
-    'apiBaseUrl' => 'https://dev-api.frontegg.com/',
-    'apiUrls' => [
-        Config::AUTHENTICATION_SERVICE => '/auth/vendor',
-        Config::EVENTS_SERVICE => '/event/resources/triggers/v2',
-    ],
+    'contextResolver' => function(RequestInterface $request) {
+        return [
+            'tenantId' => 'THE-TENANT-ID',
+            'userId' => 'test-user-id',
+            'permissions' => [],
+        ];
+    },
 ];
-$tenantId = 'YOUR_TENANT_ID';
 
 $frontegg = new Frontegg($config);
-
 
 $triggerOptions = new TriggerOptions(
     'eventKeyForTest',
@@ -192,15 +228,21 @@ $triggerOptions = new TriggerOptions(
     ),
     new ChannelsConfig(
         new WebHookBody([
-                            'title' => 'Test title!',
+            'title' => 'Test title!',
         ])
     ),
-    $tenantId
+    'YOUR_TENANT_ID'
 );
 $response = $frontegg->triggerEvent($triggerOptions);
 ````
 
-### Middleware
+### Middleware (Proxy)
+
+The Frontegg Proxy forwards requests to the Frontegg API and pass back responses.
+
+There is no Middleware (filters mechanism for HTTP request) in raw PHP, but in some frameworks it is. For example, in Laravel.
+
+Here you can see example for raw PHP. You can easily adapt it for your framework with Middleware (for Laravel see https://github.com/frontegg/samples/tree/master/frontegg-laravel-starter). 
 
 ````php
 <?php
@@ -208,7 +250,6 @@ $response = $frontegg->triggerEvent($triggerOptions);
 require_once './vendor/autoload.php';
 require_once './src/Frontegg/autoload.php';
 
-use Frontegg\Config\Config;
 use Frontegg\Frontegg;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\RequestInterface;
@@ -220,31 +261,22 @@ use Psr\Http\Message\RequestInterface;
 if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/frontegg') === 0) {
     $request = new Request('POST', $_SERVER['REQUEST_URI']);
 
-    handleFronteggUri($request);
+    $response = handleFronteggUri($request);
 }
 
-
-// DEBUG
-$request = new Request('GET', Config::PROXY_URL . '/audits?sortDirection=desc&sortBy=createdAt&filter=&offset=0&count=20');
-//$request = new Request('GET', Config::PROXY_URL . '/');
-
-handleFronteggUri($request);
+// ...
 
 function handleFronteggUri(RequestInterface $request)
 {
     $clientId = 'YOUR_CLIENT_ID';
     $apikey = 'YOUR_API_KEY';
-    $tenantId = 'tacajob400@icanav.net';
     $config = [
         'clientId' => $clientId,
         'clientSecret' => $apikey,
         'apiBaseUrl' => 'https://dev-api.frontegg.com/',
-        'apiUrls' => [
-            Config::AUTHENTICATION_SERVICE => '/auth/vendor',
-        ],
-        'contextResolver' => function(RequestInterface $request) use ($tenantId) {
+        'contextResolver' => function(RequestInterface $request) {
             return [
-                'tenantId' => $tenantId,
+                'tenantId' => 'THE-TENANT-ID',
                 'userId' => 'test-user-id',
                 'permissions' => [],
             ];
