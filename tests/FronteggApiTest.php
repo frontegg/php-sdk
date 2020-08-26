@@ -5,10 +5,10 @@ namespace Frontegg\Tests;
 use Frontegg\Authenticator\AccessToken;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
-use Frontegg\Events\Type\ChannelsConfig;
-use Frontegg\Events\Type\DefaultProperties;
-use Frontegg\Events\Type\TriggerOptions;
-use Frontegg\Events\Type\WebHookBody;
+use Frontegg\Events\Channel\WebHookBody;
+use Frontegg\Events\Config\ChannelsConfig;
+use Frontegg\Events\Config\DefaultProperties;
+use Frontegg\Events\Config\TriggerOptions;
 use Frontegg\Frontegg;
 use Frontegg\Http\ApiRawResponse;
 use GuzzleHttp\Psr7\Request;
@@ -87,8 +87,6 @@ class FronteggApiTest extends TestCase
      */
     public function testAuditsClientCanCreateAndGetThreeAuditLogs(): void
     {
-        // @TODO: Remove skipping the test later.
-        $this->markTestSkipped('Skip for now because of some data sorting error');
         // Arrange
         $auditsLogData = [
             [
@@ -127,7 +125,7 @@ class FronteggApiTest extends TestCase
             'Testing',
             0,
             3,
-            'action',
+            'createdAt',
             'desc'
         );
 

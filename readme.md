@@ -197,10 +197,10 @@ Events triggering is easy and maximum configurable for different notification ch
 require_once './vendor/autoload.php';
 require_once './src/Frontegg/autoload.php';
 
-use Frontegg\Events\Type\ChannelsConfig;
-use Frontegg\Events\Type\DefaultProperties;
-use Frontegg\Events\Type\TriggerOptions;
-use Frontegg\Events\Type\WebHookBody;
+use Frontegg\Events\Config\ChannelsConfig;
+use Frontegg\Events\Config\DefaultProperties;
+use Frontegg\Events\Config\TriggerOptions;
+use Frontegg\Events\Config\WebHookBody;
 use Frontegg\Frontegg;
 use Psr\Http\Message\RequestInterface;
 
@@ -224,7 +224,11 @@ $triggerOptions = new TriggerOptions(
     'eventKeyForTest',
     new DefaultProperties(
         'Default title',
-        'Default description'
+        'Default description',
+        [
+            'name' => 'Policy 4',
+            'id' => '11223456783245234',
+        ]
     ),
     new ChannelsConfig(
         new WebHookBody([
