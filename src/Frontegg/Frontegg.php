@@ -6,7 +6,7 @@ use Frontegg\Audits\AuditsClient;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Events\EventsClient;
-use Frontegg\Events\Type\TriggerOptionsInterface;
+use Frontegg\Events\Config\TriggerOptionsInterface;
 use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;

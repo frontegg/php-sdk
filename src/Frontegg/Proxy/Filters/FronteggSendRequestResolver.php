@@ -3,11 +3,10 @@
 namespace Frontegg\Proxy\Filters;
 
 use Frontegg\Authenticator\Authenticator;
+use Frontegg\Http\Response as FronteggResponse;
 use Frontegg\Proxy\Adapter\AdapterInterface;
-use GuzzleHttp\Psr7\Stream;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Frontegg\Http\ResponseInterface as FronteggResponseInterface;
 
 class FronteggSendRequestResolver implements FilterInterface
 {
@@ -52,13 +51,13 @@ class FronteggSendRequestResolver implements FilterInterface
             if (
                 in_array(
                     $response->getStatusCode(),
-                    $this->getSuccessHttpStatuses()
+                    FronteggResponse::getSuccessHttpStatuses()
                 )
             ) {
                 return $next($request, $response);
             }
 
-            if ($response->getStatusCode() === FronteggResponseInterface::HTTP_STATUS_UNAUTHORIZED) {
+            if ($response->getStatusCode() === FronteggResponse::HTTP_STATUS_UNAUTHORIZED) {
                 $this->authenticator->validateAuthentication();
             }
 
@@ -76,23 +75,5 @@ class FronteggSendRequestResolver implements FilterInterface
     protected function sendRequest(RequestInterface $request): ResponseInterface
     {
         return $this->httpClientAdapter->send($request);
-    }
-
-    /**
-     * @return int[]
-     */
-    protected function getSuccessHttpStatuses(): array
-    {
-        return [
-            FronteggResponseInterface::HTTP_STATUS_OK,
-            FronteggResponseInterface::HTTP_STATUS_CREATED,
-            FronteggResponseInterface::HTTP_STATUS_ACCEPTED,
-            FronteggResponseInterface::HTTP_STATUS_NON_AUTHORITATIVE_INFORMATION,
-            FronteggResponseInterface::HTTP_STATUS_NO_CONTENT,
-            FronteggResponseInterface::HTTP_STATUS_RESET_CONTENT,
-            FronteggResponseInterface::HTTP_STATUS_PARTIAL_CONTENT,
-            FronteggResponseInterface::HTTP_STATUS_MULTI_STATUS,
-            FronteggResponseInterface::HTTP_STATUS_ALREADY_REPORTED,
-        ];
     }
 }
