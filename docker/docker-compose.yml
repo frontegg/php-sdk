@@ -7,7 +7,7 @@ services:
             - ./:/app/docker
             - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
         ports:
-            - 2222:80
+            - 8080:80
 
     app:
         build:
@@ -16,3 +16,7 @@ services:
         volumes:
             - ../:/app
             - ./php/php.ini:/usr/local/etc/php/php.ini
+        environment:
+            - FRONTEGG_CLIENT_ID=THE-CLIENT-ID
+            - FRONTEGG_CLIENT_SECRET_KEY=THE-API-KEY
+            - FRONTEGG_TENANT_ID=THE-TENANT-ID
