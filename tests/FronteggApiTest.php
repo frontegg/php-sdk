@@ -26,11 +26,11 @@ use Psr\Http\Message\RequestInterface;
 class FronteggApiTest extends TestCase
 {
     // Test credentials.
-    protected const CLIENT_ID = '6da27373-1572-444f-b3c5-ef702ce65123';
-    protected const API_KEY = '0cf38799-1dae-488f-8dc8-a09b4c397ad5';
-    protected const API_BASE_URL = 'https://dev-api.frontegg.com/';
+    protected const CLIENT_ID = 'FRONTEGG_TEST_CLIENT_ID';
+    protected const API_KEY = 'FRONTEGG_TEST_API_KEY';
+    protected const API_BASE_URL = 'FRONTEGG_TEST_API_BASE_URL';
 
-    protected const TENANT_ID = 'tacajob400@icanav.net';
+    protected const TENANT_ID = 'FRONTEGG_TEST_TENANT_ID';
 
     /**
      * Frontegg API client.
@@ -45,12 +45,12 @@ class FronteggApiTest extends TestCase
     protected function setUp(): void
     {
         $config = [
-            'clientId' => self::CLIENT_ID,
-            'clientSecret' => self::API_KEY,
-            'apiBaseUrl' => self::API_BASE_URL,
+            'clientId' => getenv(self::CLIENT_ID),
+            'clientSecret' => getenv(self::API_KEY),
+            'apiBaseUrl' => getenv(self::API_BASE_URL),
             'contextResolver' => function (RequestInterface $request) {
                 return [
-                    'tenantId' => self::TENANT_ID,
+                    'tenantId' => getenv(self::TENANT_ID),
                     'userId' => 'test-user-id',
                     'permissions' => [],
                 ];
