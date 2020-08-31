@@ -2,7 +2,9 @@
 
 namespace Frontegg\Events\Channel;
 
-class WebPushProperties implements WebPushPropertiesInterface
+use Frontegg\Events\Config\UseChannelDefaults;
+
+class WebPushProperties extends UseChannelDefaults implements WebPushPropertiesInterface
 {
     /**
      * Web push notification title.

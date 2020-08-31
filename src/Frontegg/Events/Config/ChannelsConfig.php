@@ -11,55 +11,67 @@ use Frontegg\Events\Channel\WebPushPropertiesInterface;
 class ChannelsConfig implements ChannelsConfigInterface
 {
     /**
-     * Body properties. If set to null then default properties will be sent in the body.
+     * Body properties.
+     * Pass instance of UseChannelDefaults class to send default properties.
+     * If set to null then this channel data will not be sent.
      *
-     * @var WebHookBody|null
+     * @var WebHookBody|UseChannelDefaults|null
      */
     protected $webHook;
 
     /**
-     * Properties for this channel. If set to null then default properties will be sent.
+     * Properties for this channel.
+     * Pass instance of UseChannelDefaults class to send default properties.
+     * If set to null then this channel data will not be sent.
      *
-     * @var SlackChatPostMessageArgumentsInterface|null
+     * @var SlackChatPostMessageArgumentsInterface|UseChannelDefaults|null
      */
     protected $slack;
 
     /**
-     * Properties for this channel. If set to null then default properties will be sent.
+     * Properties for this channel.
+     * Pass instance of UseChannelDefaults class to send default properties.
+     * If set to null then this channel data will not be sent.
      *
-     * @var WebPushPropertiesInterface|null
+     * @var WebPushPropertiesInterface|UseChannelDefaults|null
      */
     protected $webPush;
 
     /**
-     * Properties for this channel. If set to null then default properties will be sent.
+     * Properties for this channel.
+     * Pass instance of UseChannelDefaults class to send default properties.
+     * If set to null then this channel data will not be sent.
      *
-     * @var AuditPropertiesInterface|null
+     * @var AuditPropertiesInterface|UseChannelDefaults|null
      */
     protected $audit;
 
     /**
-     * Properties for this channel. If set to null then default properties will be sent.
+     * Properties for this channel.
+     * Pass instance of UseChannelDefaults class to send default properties.
+     * If set to null then this channel data will not be sent.
      *
-     * @var BellPropertiesInterface|null
+     * @var BellPropertiesInterface|UseChannelDefaults|null
      */
     protected $bell;
 
     /**
      * ChannelsConfig constructor.
      *
-     * @param WebHookBody|null                            $webHook
-     * @param WebPushPropertiesInterface|null             $webPush
-     * @param AuditPropertiesInterface|null               $audit
-     * @param BellPropertiesInterface|null                $bell
-     * @param SlackChatPostMessageArgumentsInterface|null $slack
+     * @TODO: Refactor to use channel types (WebHookBody) as parameter types.
+     *
+     * @param WebHookBody|UseChannelDefaults|null                            $webHook
+     * @param WebPushPropertiesInterface|UseChannelDefaults|null             $webPush
+     * @param AuditPropertiesInterface|UseChannelDefaults|null               $audit
+     * @param BellPropertiesInterface|UseChannelDefaults|null                $bell
+     * @param SlackChatPostMessageArgumentsInterface|UseChannelDefaults|null $slack
      */
     public function __construct(
-        ?WebHookBody $webHook = null,
-        ?WebPushPropertiesInterface $webPush = null,
-        ?AuditPropertiesInterface $audit = null,
-        ?BellPropertiesInterface $bell = null,
-        ?SlackChatPostMessageArgumentsInterface $slack = null
+        ?UseChannelDefaults $webHook = null,
+        ?UseChannelDefaults $webPush = null,
+        ?UseChannelDefaults $audit = null,
+        ?UseChannelDefaults $bell = null,
+        ?UseChannelDefaults $slack = null
     ) {
         $this->webHook = $webHook;
         $this->slack = $slack;
@@ -69,81 +81,81 @@ class ChannelsConfig implements ChannelsConfigInterface
     }
 
     /**
-     * @return WebHookBody|null
+     * @return WebHookBody|UseChannelDefaults|null
      */
-    public function getWebHook(): ?WebHookBody
+    public function getWebHook(): ?UseChannelDefaults
     {
         return $this->webHook;
     }
 
     /**
-     * @param WebHookBody|null $webHook
+     * @param WebHookBody|UseChannelDefaults|null $webHook
      */
-    public function setWebHook(?WebHookBody $webHook): void
+    public function setWebHook(?UseChannelDefaults $webHook): void
     {
         $this->webHook = $webHook;
     }
 
     /**
-     * @return SlackChatPostMessageArgumentsInterface|null
+     * @return SlackChatPostMessageArgumentsInterface|UseChannelDefaults|null
      */
-    public function getSlack(): ?SlackChatPostMessageArgumentsInterface
+    public function getSlack(): ?UseChannelDefaults
     {
         return $this->slack;
     }
 
     /**
-     * @param SlackChatPostMessageArgumentsInterface|null $slack
+     * @param SlackChatPostMessageArgumentsInterface|UseChannelDefaults|null $slack
      */
-    public function setSlack(?SlackChatPostMessageArgumentsInterface $slack): void
+    public function setSlack(?UseChannelDefaults $slack): void
     {
         $this->slack = $slack;
     }
 
     /**
-     * @return WebPushPropertiesInterface|null
+     * @return WebPushPropertiesInterface|UseChannelDefaults|null
      */
-    public function getWebPush(): ?WebPushPropertiesInterface
+    public function getWebPush(): ?UseChannelDefaults
     {
         return $this->webPush;
     }
 
     /**
-     * @param WebPushPropertiesInterface|null $webPush
+     * @param WebPushPropertiesInterface|UseChannelDefaults|null $webPush
      */
-    public function setWebPush(?WebPushPropertiesInterface $webPush): void
+    public function setWebPush(?UseChannelDefaults $webPush): void
     {
         $this->webPush = $webPush;
     }
 
     /**
-     * @return AuditPropertiesInterface|null
+     * @return AuditPropertiesInterface|UseChannelDefaults|null
      */
-    public function getAudit(): ?AuditPropertiesInterface
+    public function getAudit(): ?UseChannelDefaults
     {
         return $this->audit;
     }
 
     /**
-     * @param AuditPropertiesInterface|null $audit
+     * @param AuditPropertiesInterface|UseChannelDefaults|null $audit
      */
-    public function setAudit(?AuditPropertiesInterface $audit): void
+    public function setAudit(?UseChannelDefaults $audit): void
     {
         $this->audit = $audit;
     }
 
     /**
-     * @return BellPropertiesInterface|null
+     * @return BellPropertiesInterface|UseChannelDefaults|null
      */
-    public function getBell(): ?BellPropertiesInterface
+    public function getBell(): ?UseChannelDefaults
     {
         return $this->bell;
     }
 
     /**
-     * @param BellPropertiesInterface|null $bell
+     * @param BellPropertiesInterface|UseChannelDefaults|null $bell
      */
-    public function setBell(?BellPropertiesInterface $bell): void
+    public function setBell(?UseChannelDefaults $bell): void
     {
         $this->bell = $bell;
     }
@@ -181,14 +193,29 @@ class ChannelsConfig implements ChannelsConfigInterface
      */
     public function toArray(): array
     {
-        return [
-            'webhook' => $this->webHook !== null ? $this->webHook->toArray()
-                : true,
-            'webpush' => $this->webPush !== null ? $this->webPush->toArray()
-                : true,
-            'audit' => $this->audit !== null ? $this->audit->toArray() : true,
-            'bell' => $this->bell !== null ? $this->bell->toArray() : true,
-            'slack' => $this->slack !== null ? $this->slack->toArray() : true,
-        ];
+        $channels = [];
+
+        if ($this->webHook !== null) {
+            $data = $this->webHook->toArray();
+            $channels['webhook'] = $data !== [] ? $data : true;
+        }
+        if ($this->webPush !== null) {
+            $data = $this->webPush->toArray();
+            $channels['webpush'] = $data !== [] ? $data : true;
+        }
+        if ($this->audit !== null) {
+            $data = $this->audit->toArray();
+            $channels['audit'] = $data !== [] ? $data : true;
+        }
+        if ($this->bell !== null) {
+            $data = $this->bell->toArray();
+            $channels['bell'] = $data !== [] ? $data : true;
+        }
+        if ($this->slack !== null) {
+            $data = $this->slack->toArray();
+            $channels['slack'] = $data !== [] ? $data : true;
+        }
+
+        return $channels;
     }
 }

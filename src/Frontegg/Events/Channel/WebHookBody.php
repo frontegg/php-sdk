@@ -2,9 +2,9 @@
 
 namespace Frontegg\Events\Channel;
 
-use Frontegg\Events\Config\SerializableInterface;
+use Frontegg\Events\Config\UseChannelDefaults;
 
-class WebHookBody implements SerializableInterface
+class WebHookBody extends UseChannelDefaults
 {
     /**
      * Data to store in format key-value.

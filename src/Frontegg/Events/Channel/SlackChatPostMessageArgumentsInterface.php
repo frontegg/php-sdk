@@ -2,9 +2,7 @@
 
 namespace Frontegg\Events\Channel;
 
-use Frontegg\Events\Config\SerializableInterface;
-
-interface SlackChatPostMessageArgumentsInterface extends SerializableInterface
+interface SlackChatPostMessageArgumentsInterface
 {
     public const PARSE_FULL = 'full';
     public const PARSE_NONE = 'none';

@@ -3,8 +3,9 @@
 namespace Frontegg\Events\Channel;
 
 use DateTime;
+use Frontegg\Events\Config\UseChannelDefaults;
 
-class AuditProperties implements AuditPropertiesInterface
+class AuditProperties extends UseChannelDefaults implements AuditPropertiesInterface
 {
     protected const SEVERITY_DEFAULT_VALUE = self::SEVERITY_INFO;
 

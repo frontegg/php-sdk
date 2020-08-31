@@ -2,9 +2,7 @@
 
 namespace Frontegg\Events\Channel;
 
-use Frontegg\Events\Config\SerializableInterface;
-
-interface WebPushPropertiesInterface extends SerializableInterface
+interface WebPushPropertiesInterface
 {
     /**
      * @return string|null
