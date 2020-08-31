@@ -3,9 +3,8 @@
 namespace Frontegg\Events\Channel;
 
 use DateTime;
-use Frontegg\Events\Config\SerializableInterface;
 
-interface BellPropertiesInterface extends SerializableInterface
+interface BellPropertiesInterface
 {
     /**
      * @TODO: Move to separate class NotificationSeverity.

@@ -10,7 +10,7 @@ Frontegg is a web platform where SaaS companies can set up their fully managed, 
 Use the package manager [Composer](https://getcomposer.org/) to install Frontegg SDK for PHP.
 
 ```bash
-composer install frontegg/php-sdk
+composer require frontegg/php-sdk
 ```
 
 ## Usage
@@ -200,7 +200,7 @@ require_once './src/Frontegg/autoload.php';
 use Frontegg\Events\Config\ChannelsConfig;
 use Frontegg\Events\Config\DefaultProperties;
 use Frontegg\Events\Config\TriggerOptions;
-use Frontegg\Events\Config\WebHookBody;
+use Frontegg\Events\Channel\WebHookBody;
 use Frontegg\Frontegg;
 use Psr\Http\Message\RequestInterface;
 

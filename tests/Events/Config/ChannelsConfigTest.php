@@ -16,6 +16,7 @@ use Frontegg\Events\Channel\WebPushPropertiesInterface;
 use Frontegg\Events\Config\ChannelsConfig;
 use Frontegg\Events\Config\ChannelsConfigInterface;
 use Frontegg\Events\Config\SerializableInterface;
+use Frontegg\Events\Config\UseChannelDefaults;
 use PHPUnit\Framework\TestCase;
 
 class ChannelsConfigTest extends TestCase
@@ -238,10 +239,88 @@ class ChannelsConfigTest extends TestCase
     /**
      * @return void
      */
-    public function testEmptyChannelsConfigCanBeSerialized(): void
+    public function testChannelsConfigPartiallyInitializedCanBeSerialized(): void
     {
         // Arrange
         $object = new ChannelsConfig();
+        $object->setWebHook(
+            new WebHookBody(
+                [
+                    'field 1' => 'value 1',
+                    'field 2' => 'value 2',
+                    'field 3' => 'value 3',
+                ]
+            )
+        );
+        $object->setWebPush(
+            new WebPushProperties(
+                'Some test title',
+                'Information data. Message number one!',
+                'Test-user-ID'
+            )
+        );
+        $object->setSlack(
+            new SlackChatPostMessageArguments(
+                'SLACK-API-TOKEN',
+                '#general',
+                'Some text to show!'
+            )
+        );
+
+        // Act
+        $json = $object->toJSON();
+
+        // Assert
+        $this->assertInstanceOf(SerializableInterface::class, $object);
+        $this->assertJsonStringEqualsJsonString(
+            '{
+                "webhook": {
+                    "field 1": "value 1",
+                    "field 2": "value 2",
+                    "field 3": "value 3"
+                },
+                "webpush": {
+                    "title": "Some test title",
+                    "body": "Information data. Message number one!",
+                    "userId": "Test-user-ID"
+                },
+                "slack": {
+                    "token": "SLACK-API-TOKEN",
+                    "channel": "#general",
+                    "text": "Some text to show!",
+                    "as_user": null,
+                    "attachments": {},
+                    "blocks": {},
+                    "icon_emoji": null,
+                    "icon_url": null,
+                    "link_names": null,
+                    "mrkdwn": null,
+                    "parse": "none",
+                    "reply_broadcast": null,
+                    "thread_ts": null,
+                    "unfurl_links": null,
+                    "unfurl_media": null,
+                    "username": null
+                }
+            }',
+            $json
+        );
+        $this->assertTrue($object->isConfigured());
+    }
+
+    /**
+     * @return void
+     */
+    public function testChannelsConfigWithDefaultValuesCanBeSerialized(): void
+    {
+        // Arrange
+        $object = new ChannelsConfig(
+            new UseChannelDefaults(),
+            new UseChannelDefaults(),
+            new UseChannelDefaults(),
+            new UseChannelDefaults(),
+            new UseChannelDefaults()
+        );
 
         // Act
         $json = $object->toJSON();
@@ -256,6 +335,26 @@ class ChannelsConfigTest extends TestCase
                 "audit": true,
                 "slack": true
             }',
+            $json
+        );
+        $this->assertTrue($object->isConfigured());
+    }
+
+    /**
+     * @return void
+     */
+    public function testEmptyChannelsConfigCanBeSerialized(): void
+    {
+        // Arrange
+        $object = new ChannelsConfig();
+
+        // Act
+        $json = $object->toJSON();
+
+        // Assert
+        $this->assertInstanceOf(SerializableInterface::class, $object);
+        $this->assertJsonStringEqualsJsonString(
+            '{}',
             $json
         );
         $this->assertFalse($object->isConfigured());

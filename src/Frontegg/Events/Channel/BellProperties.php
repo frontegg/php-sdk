@@ -3,9 +3,10 @@
 namespace Frontegg\Events\Channel;
 
 use DateTime;
+use Frontegg\Events\Config\UseChannelDefaults;
 use Frontegg\Exception\InvalidParameterException;
 
-class BellProperties implements BellPropertiesInterface
+class BellProperties extends UseChannelDefaults implements BellPropertiesInterface
 {
     protected const SEVERITY_DEFAULT_VALUE = self::SEVERITY_INFO;
 

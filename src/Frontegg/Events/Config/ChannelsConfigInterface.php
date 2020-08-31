@@ -11,29 +11,29 @@ use Frontegg\Events\Channel\WebPushPropertiesInterface;
 interface ChannelsConfigInterface extends SerializableInterface
 {
     /**
-     * @return WebHookBody|null
+     * @return WebHookBody|UseChannelDefaults|null
      */
-    public function getWebHook(): ?WebHookBody;
+    public function getWebHook(): ?UseChannelDefaults;
 
     /**
-     * @return SlackChatPostMessageArgumentsInterface|null
+     * @return SlackChatPostMessageArgumentsInterface|UseChannelDefaults|null
      */
-    public function getSlack(): ?SlackChatPostMessageArgumentsInterface;
+    public function getSlack(): ?UseChannelDefaults;
 
     /**
-     * @return WebPushPropertiesInterface|null
+     * @return WebPushPropertiesInterface|UseChannelDefaults|null
      */
-    public function getWebPush(): ?WebPushPropertiesInterface;
+    public function getWebPush(): ?UseChannelDefaults;
 
     /**
-     * @return AuditPropertiesInterface|null
+     * @return AuditPropertiesInterface|UseChannelDefaults|null
      */
-    public function getAudit(): ?AuditPropertiesInterface;
+    public function getAudit(): ?UseChannelDefaults;
 
     /**
-     * @return BellPropertiesInterface|null
+     * @return BellPropertiesInterface|UseChannelDefaults|null
      */
-    public function getBell(): ?BellPropertiesInterface;
+    public function getBell(): ?UseChannelDefaults;
 
     /**
      * Check if at least one channel is configured.

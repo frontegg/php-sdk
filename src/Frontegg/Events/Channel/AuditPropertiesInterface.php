@@ -3,9 +3,8 @@
 namespace Frontegg\Events\Channel;
 
 use DateTime;
-use Frontegg\Events\Config\SerializableInterface;
 
-interface AuditPropertiesInterface extends SerializableInterface
+interface AuditPropertiesInterface
 {
     /**
      * @TODO: Move to separate class NotificationSeverity.

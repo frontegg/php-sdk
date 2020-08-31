@@ -9,6 +9,7 @@ use Frontegg\Events\Config\DefaultPropertiesInterface;
 use Frontegg\Events\Config\SerializableInterface;
 use Frontegg\Events\Config\TriggerOptions;
 use Frontegg\Events\Config\TriggerOptionsInterface;
+use Frontegg\Events\Config\UseChannelDefaults;
 use PHPUnit\Framework\TestCase;
 
 class TriggerOptionsTest extends TestCase
@@ -52,7 +53,11 @@ class TriggerOptionsTest extends TestCase
                 'Default title',
                 'Default description'
             ),
-            new ChannelsConfig(),
+            new ChannelsConfig(
+                new UseChannelDefaults(),
+                null,
+                new UseChannelDefaults()
+            ),
             'THE-TENANT-ID'
         );
 
@@ -71,10 +76,7 @@ class TriggerOptionsTest extends TestCase
                 "tenantId": "THE-TENANT-ID",
                 "channels": {
                     "webhook": true,
-                    "webpush": true,
-                    "bell": true,
-                    "audit": true,
-                    "slack": true
+                    "audit": true
                 }
             }',
             $json
@@ -93,7 +95,13 @@ class TriggerOptionsTest extends TestCase
                 'Default title',
                 'Default description'
             ),
-            new ChannelsConfig()
+            new ChannelsConfig(
+                new UseChannelDefaults(),
+                null,
+                null,
+                null,
+                new UseChannelDefaults()
+            )
         );
 
         // Act
@@ -111,9 +119,6 @@ class TriggerOptionsTest extends TestCase
                 "tenantId": null,
                 "channels": {
                     "webhook": true,
-                    "webpush": true,
-                    "bell": true,
-                    "audit": true,
                     "slack": true
                 }
             }',

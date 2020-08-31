@@ -2,7 +2,9 @@
 
 namespace Frontegg\Events\Channel;
 
-class SlackChatPostMessageArguments implements SlackChatPostMessageArgumentsInterface
+use Frontegg\Events\Config\UseChannelDefaults;
+
+class SlackChatPostMessageArguments extends UseChannelDefaults implements SlackChatPostMessageArgumentsInterface
 {
     /**
      * Slack API token.
