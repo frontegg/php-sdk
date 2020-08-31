@@ -151,7 +151,7 @@ class FronteggTest extends AuthenticatorTestCaseHelper
                 "eventKey":"event-key",
                 "properties":{},
                 "channels":{},
-                "vendorId":"6da27373-1572-444f-b3c5-ef702ce65123",
+                "vendorId":"THE-VENDOR-ID",
                 "tenantId":"THE-TENANT-ID"
             }',
             200

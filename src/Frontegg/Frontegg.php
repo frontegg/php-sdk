@@ -41,6 +41,11 @@ class Frontegg
     public const CLIENT_SECRET_ENV_NAME = 'FRONTEGG_CLIENT_SECRET_KEY';
 
     /**
+     * @const string The name of the environment variable that contains the tenant ID.
+     */
+    public const TENANT_ID_ENV_NAME = 'FRONTEGG_TENANT_ID';
+
+    /**
      * @const string Default API version for requests.
      */
     public const DEFAULT_API_BASE_URL = 'https://api.frontegg.com';
@@ -144,10 +149,8 @@ class Frontegg
         $this->proxy = new Proxy(
             $this->authenticator,
             new FronteggAdapter($this->client),
-            // @TODO: Refactor this to use context resolver.
             $this->config->getContextResolver()
         );
-        // @TODO: Instantiate Notifications, etc.
     }
 
     /**

@@ -57,11 +57,11 @@ class ProxyTest extends ProxyTestCaseHelper
                     {
                         "title":"Default title",
                         "severity":"Info",
-                        "tenantId":"tacajob400@icanav.net",
-                        "vendorId":"6da27373-1572-444f-b3c5-ef702ce65123",
+                        "tenantId":"THE-TENANT-ID",
+                        "vendorId":"THE-VENDOR-ID",
                         "createdAt":"2020-08-22 06:47:25.025",
                         "description":"Default description",
-                        "frontegg_id":"6eacf416-67e2-4760-85d7-9ab90a18a945"
+                        "frontegg_id":"THE-FRONTEGG-ID"
                     }
                 ]
             }',
