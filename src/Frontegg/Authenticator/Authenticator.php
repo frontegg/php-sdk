@@ -6,13 +6,13 @@ use DateTime;
 use Frontegg\Config\Config;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\Http\RequestInterface;
-use Frontegg\Http\ResponseInterface;
+use Frontegg\Http\Response;
 use Frontegg\HttpClient\FronteggHttpClientInterface;
-use JsonException;
+use Frontegg\Json\ApiJsonTrait;
 
 class Authenticator
 {
-    protected const JSON_DECODE_DEPTH = 512;
+    use ApiJsonTrait;
 
     /**
      * Frontegg configuration.
@@ -35,11 +35,6 @@ class Authenticator
      * @var ApiRawResponse|null
      */
     protected $lastResponse;
-
-    /**
-     * @var ApiError|null
-     */
-    protected $apiError;
 
     /**
      * Authenticator constructor.
@@ -88,14 +83,6 @@ class Authenticator
     }
 
     /**
-     * @return ApiError|null
-     */
-    public function getApiError(): ?ApiError
-    {
-        return $this->apiError;
-    }
-
-    /**
      * Authenticate client using client ID and secret key. Retrieves an access
      * token.
      *
@@ -122,7 +109,7 @@ class Authenticator
         );
 
         if (
-            ResponseInterface::HTTP_STATUS_OK
+            Response::HTTP_STATUS_OK
             !== $this->lastResponse->getHttpResponseCode()
         ) {
             $this->setErrorFromResponseData();
@@ -160,15 +147,20 @@ class Authenticator
             $this->lastResponse->getBody()
         );
 
+        if ($responseBodyDecoded === null) {
+            $this->accessToken = null;
+
+            return;
+        }
+
         if (
-            !$responseBodyDecoded
-            || !isset($responseBodyDecoded['token'])
+            !isset($responseBodyDecoded['token'])
             || !isset($responseBodyDecoded['expiresIn'])
         ) {
-            $this->apiError = new ApiError(
+            $this->setApiError(
                 'Bad credentials',
                 'Invalid token or expires in value.',
-                null,
+                null
             );
             $this->accessToken = null;
 
@@ -197,45 +189,17 @@ class Authenticator
             $this->lastResponse->getBody()
         );
 
-        $this->apiError = new ApiError(
+        if ($errorDecoded === null) {
+            $this->accessToken = null;
+
+            return;
+        }
+
+        $this->setApiError(
             $errorDecoded['error'] ?? '',
             $errorDecoded['message'] ? print_r($errorDecoded['message'], true) : '',
-            $errorDecoded['statusCode'] ?? null,
+            $errorDecoded['statusCode'] ?? null
         );
         $this->accessToken = null;
-    }
-
-    /**
-     * Returns JSON data decoded into array.
-     *
-     * @param string|null $jsonData
-     *
-     * @return array|null
-     */
-    protected function getDecodedJsonData(?string $jsonData): ?array
-    {
-        if (empty($jsonData)) {
-            $this->apiError = new ApiError(
-                'Invalid JSON',
-                'An empty string can\'t be parsed as valid JSON.'
-            );
-            $this->accessToken = null;
-
-            return null;
-        }
-
-        try {
-            return json_decode(
-                $jsonData,
-                true,
-                self::JSON_DECODE_DEPTH,
-                JSON_THROW_ON_ERROR
-            );
-        } catch (JsonException $e) {
-            $this->apiError = new ApiError('Invalid JSON', $e->getMessage());
-            $this->accessToken = null;
-        }
-
-        return null;
     }
 }

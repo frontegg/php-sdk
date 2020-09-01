@@ -135,7 +135,7 @@ class Proxy
     }
 
     /**
-     * Returns request with overriden and sanitized URI.
+     * Returns request with overridden and sanitized URI.
      *
      * @param string $target
      *

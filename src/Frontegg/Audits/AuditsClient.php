@@ -3,7 +3,6 @@
 namespace Frontegg\Audits;
 
 use Exception;
-use Frontegg\Authenticator\ApiError;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Exception\AuthenticationException;
@@ -11,22 +10,18 @@ use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
 use Frontegg\Exception\InvalidUrlConfigException;
 use Frontegg\Http\RequestInterface;
-use Frontegg\Http\ResponseInterface;
-use JsonException;
+use Frontegg\Http\Response;
+use Frontegg\HttpClient\FronteggHttpClientInterface;
+use Frontegg\Json\ApiJsonTrait;
 
 class AuditsClient
 {
-    protected const JSON_DECODE_DEPTH = 512;
+    use ApiJsonTrait;
 
     /**
      * @var Authenticator
      */
     protected $authenticator;
-
-    /**
-     * @var ApiError|null
-     */
-    protected $apiError;
 
     /**
      * AuditsClient constructor.
@@ -61,6 +56,8 @@ class AuditsClient
      * @param mixed       $filters       Dynamic query params based on the metadata
      *
      * @throws AuthenticationException
+     * @throws FronteggSDKException
+     * @throws InvalidUrlConfigException
      *
      * @return array
      */
@@ -73,32 +70,18 @@ class AuditsClient
         string $sortDirection = 'ASC',
         ...$filters
     ): array {
-        $this->authenticator->validateAuthentication();
-        if (!$this->authenticator->getAccessToken()) {
-            throw new AuthenticationException('Authentication problem');
-        }
+        $this->validateAuthentication();
 
-        // @todo: Refactor this.
-
-        $httpClient = $this->authenticator->getClient();
         $accessTokenValue = $this->getAuthenticator()
             ->getAccessToken()
             ->getValue();
-        $fronteggConfig = $this->authenticator->getConfig();
-        $url = $fronteggConfig->getServiceUrl(
-            Config::AUDITS_SERVICE
-        );
-        $body = json_encode(
-            array_merge(
-                [
-                    'filter' => $filter,
-                    'offset' => $offset,
-                    'count' => $count,
-                    'sortBy' => $sortBy,
-                    'sortDirection' => $sortDirection,
-                ],
-                $filters
-            )
+        $url = $this->getUrlWithQueryParams(
+            $filter,
+            $offset,
+            $count,
+            $sortBy,
+            $sortDirection,
+            $filters
         );
 
         $headers = [
@@ -107,15 +90,18 @@ class AuditsClient
             'frontegg-tenant-id' => $tenantId,
         ];
 
-        $lastResponse = $httpClient->send(
+        $lastResponse = $this->getHttpClient()->send(
             $url,
             RequestInterface::METHOD_GET,
-            $body,
+            '',
             $headers,
             RequestInterface::HTTP_REQUEST_TIMEOUT
         );
 
-        if (ResponseInterface::HTTP_STATUS_OK !== $lastResponse->getHttpResponseCode()) {
+        if (
+            Response::HTTP_STATUS_OK
+            !== $lastResponse->getHttpResponseCode()
+        ) {
             throw new AuthenticationException($lastResponse->getBody());
         }
 
@@ -155,29 +141,19 @@ class AuditsClient
             );
         }
 
-        $this->authenticator->validateAuthentication();
-        if (!$this->authenticator->getAccessToken()) {
-            throw new AuthenticationException('Authentication problem');
-        }
+        $this->validateAuthentication();
 
-        // @todo: Refactor this.
-
-        $httpClient = $this->authenticator->getClient();
         $accessTokenValue = $this->getAuthenticator()
             ->getAccessToken()
             ->getValue();
-        $fronteggConfig = $this->authenticator->getConfig();
-        $url = $fronteggConfig->getServiceUrl(
-            Config::AUDITS_SERVICE
-        );
         $headers = [
             'Content-Type' => 'application/json',
             'x-access-token' => $accessTokenValue,
             'frontegg-tenant-id' => $tenantId,
         ];
 
-        $lastResponse = $httpClient->send(
-            $url,
+        $lastResponse = $this->getHttpClient()->send(
+            $this->getAuditsServiceUrl(),
             RequestInterface::METHOD_POST,
             json_encode($auditLog),
             $headers,
@@ -187,7 +163,7 @@ class AuditsClient
         if (
             !in_array(
                 $lastResponse->getHttpResponseCode(),
-                [ResponseInterface::HTTP_STATUS_OK, ResponseInterface::HTTP_STATUS_ACCEPTED]
+                Response::getSuccessHttpStatuses()
             )
         ) {
             throw new AuthenticationException($lastResponse->getBody());
@@ -196,49 +172,92 @@ class AuditsClient
         $auditLogData = $this->getDecodedJsonData($lastResponse->getBody());
 
         if (null === $auditLogData) {
-            throw new FronteggSDKException('An error occurred while response data was decoding');
+            throw new FronteggSDKException(
+                'An error occurred while response data was decoding'
+            );
         }
 
         return $auditLogData;
     }
 
     /**
-     * Returns JSON data decoded into array.
+     * Returns combined service URL with query string parameters.
      *
-     * @param string|null $jsonData
+     * @param string      $filter
+     * @param int         $offset
+     * @param int|null    $count
+     * @param string|null $sortBy
+     * @param string      $sortDirection
+     * @param array       $filters
      *
-     * @return array|null
+     * @throws InvalidUrlConfigException
+     *
+     * @return string
      */
-    protected function getDecodedJsonData(?string $jsonData): ?array
-    {
-        if (empty($jsonData)) {
-            $this->apiError = new ApiError(
-                'Invalid JSON',
-                'An empty string can\'t be parsed as valid JSON.'
-            );
-
-            return null;
-        }
-
-        try {
-            return json_decode(
-                $jsonData,
-                true,
-                self::JSON_DECODE_DEPTH,
-                JSON_THROW_ON_ERROR
-            );
-        } catch (JsonException $e) {
-            $this->apiError = new ApiError('Invalid JSON', $e->getMessage());
-        }
-
-        return null;
+    protected function getUrlWithQueryParams(
+        string $filter,
+        int $offset,
+        ?int $count,
+        ?string $sortBy,
+        string $sortDirection,
+        array $filters
+    ): string {
+        return sprintf(
+            '%s?%s',
+            $this->getAuditsServiceUrl(),
+            http_build_query(
+                array_merge(
+                    [
+                        'filter' => $filter,
+                        'offset' => $offset,
+                        'count' => $count,
+                        'sortBy' => $sortBy,
+                        'sortDirection' => $sortDirection,
+                    ],
+                    $filters
+                )
+            )
+        );
     }
 
     /**
-     * @return ApiError|null
+     * Returns Audits service URL from config.
+     *
+     * @throws InvalidUrlConfigException
+     *
+     * @return string
      */
-    public function getApiError(): ?ApiError
+    protected function getAuditsServiceUrl(): string
     {
-        return $this->apiError;
+        return $this->authenticator->getConfig()
+            ->getServiceUrl(
+                Config::AUDITS_SERVICE
+            );
+    }
+
+    /**
+     * Returns HTTP client.
+     *
+     * @return FronteggHttpClientInterface
+     */
+    protected function getHttpClient(): FronteggHttpClientInterface
+    {
+        return $this->authenticator->getClient();
+    }
+
+    /**
+     * Validates access token.
+     * Throws an exception on failure.
+     *
+     * @throws AuthenticationException
+     *
+     * @return void
+     */
+    protected function validateAuthentication(): void
+    {
+        $this->authenticator->validateAuthentication();
+        if (!$this->authenticator->getAccessToken()) {
+            throw new AuthenticationException('Authentication problem');
+        }
     }
 }

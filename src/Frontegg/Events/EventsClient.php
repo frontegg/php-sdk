@@ -2,34 +2,28 @@
 
 namespace Frontegg\Events;
 
-use Frontegg\Authenticator\ApiError;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
-use Frontegg\Events\Type\TriggerOptionsInterface;
+use Frontegg\Events\Config\TriggerOptionsInterface;
 use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\EventTriggerException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
+use Frontegg\Exception\InvalidUrlConfigException;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\Http\RequestInterface;
-use Frontegg\Http\ResponseInterface;
-use JsonException;
+use Frontegg\Http\Response;
+use Frontegg\HttpClient\FronteggHttpClientInterface;
+use Frontegg\Json\ApiJsonTrait;
 
 class EventsClient
 {
-    protected const JSON_DECODE_DEPTH = 512;
+    use ApiJsonTrait;
 
     /**
      * @var Authenticator
      */
     protected $authenticator;
-
-    /**
-     * API error.
-     *
-     * @var ApiError|null
-     */
-    protected $apiError;
 
     /**
      * EventsClient constructor.
@@ -63,29 +57,19 @@ class EventsClient
             );
         }
 
-        $this->authenticator->validateAuthentication();
-        if (!$this->authenticator->getAccessToken()) {
-            throw new AuthenticationException('Authentication problem');
-        }
+        $this->validateAuthentication();
 
-        // @todo: Refactor this.
-
-        $httpClient = $this->authenticator->getClient();
         $accessTokenValue = $this->authenticator
             ->getAccessToken()
             ->getValue();
-        $fronteggConfig = $this->authenticator->getConfig();
-        $url = $fronteggConfig->getServiceUrl(
-            Config::EVENTS_SERVICE
-        );
         $headers = [
             'Content-Type' => 'application/json',
             'x-access-token' => $accessTokenValue,
             'frontegg-tenant-id' => $triggerOptions->getTenantId(),
         ];
 
-        $lastResponse = $httpClient->send(
-            $url,
+        $lastResponse = $this->getHttpClient()->send(
+            $this->getEventsServiceUrl(),
             RequestInterface::METHOD_POST,
             json_encode([
                 'eventKey' => $triggerOptions->getEventKey(),
@@ -99,7 +83,7 @@ class EventsClient
         if (
             !in_array(
                 $lastResponse->getHttpResponseCode(),
-                [ResponseInterface::HTTP_STATUS_OK, ResponseInterface::HTTP_STATUS_ACCEPTED]
+                Response::getSuccessHttpStatuses()
             )
         ) {
             if (empty($lastResponse->getBody())) {
@@ -127,50 +111,51 @@ class EventsClient
             $response->getBody()
         );
 
-        $this->apiError = new ApiError(
+        $this->setApiError(
             $errorDecoded['error'] ?? '',
             $errorDecoded['message'] ? print_r($errorDecoded['message'], true) : '',
-            $errorDecoded['statusCode'] ?? null,
+            $errorDecoded['statusCode'] ?? null
         );
     }
 
     /**
-     * Returns JSON data decoded into array.
+     * Returns Events service URL from config.
      *
-     * @param string|null $jsonData
+     * @throws InvalidUrlConfigException
      *
-     * @return array|null
+     * @return string
      */
-    protected function getDecodedJsonData(?string $jsonData): ?array
+    protected function getEventsServiceUrl(): string
     {
-        if (empty($jsonData)) {
-            $this->apiError = new ApiError(
-                'Invalid JSON',
-                'An empty string can\'t be parsed as valid JSON.'
+        return $this->authenticator->getConfig()
+            ->getServiceUrl(
+                Config::EVENTS_SERVICE
             );
-
-            return null;
-        }
-
-        try {
-            return json_decode(
-                $jsonData,
-                true,
-                self::JSON_DECODE_DEPTH,
-                JSON_THROW_ON_ERROR
-            );
-        } catch (JsonException $e) {
-            $this->apiError = new ApiError('Invalid JSON', $e->getMessage());
-        }
-
-        return null;
     }
 
     /**
-     * @return ApiError|null
+     * Returns HTTP client.
+     *
+     * @return FronteggHttpClientInterface
      */
-    public function getApiError(): ?ApiError
+    protected function getHttpClient(): FronteggHttpClientInterface
     {
-        return $this->apiError;
+        return $this->authenticator->getClient();
+    }
+
+    /**
+     * Validates access token.
+     * Throws an exception on failure.
+     *
+     * @throws AuthenticationException
+     *
+     * @return void
+     */
+    protected function validateAuthentication(): void
+    {
+        $this->authenticator->validateAuthentication();
+        if (!$this->authenticator->getAccessToken()) {
+            throw new AuthenticationException('Authentication problem');
+        }
     }
 }

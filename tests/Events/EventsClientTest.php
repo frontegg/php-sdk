@@ -2,12 +2,11 @@
 
 namespace Frontegg\Tests\Events;
 
-use Frontegg\Authenticator\ApiError;
-use Frontegg\Events\Type\ChannelsConfig;
-use Frontegg\Events\Type\DefaultProperties;
-use Frontegg\Events\Type\TriggerOptions;
-use Frontegg\Events\Type\WebHookBody;
-use Frontegg\Exception\EventTriggerException;
+use Frontegg\Error\ApiError;
+use Frontegg\Events\Channel\WebHookBody;
+use Frontegg\Events\Config\ChannelsConfig;
+use Frontegg\Events\Config\DefaultProperties;
+use Frontegg\Events\Config\TriggerOptions;
 use Frontegg\Http\ApiRawResponse;
 use Frontegg\Tests\Helper\EventsTestCaseHelper;
 
@@ -25,7 +24,7 @@ class EventsClientTest extends EventsTestCaseHelper
                 "eventKey":"event-key",
                 "properties":{},
                 "channels":{},
-                "vendorId":"6da27373-1572-444f-b3c5-ef702ce65123",
+                "vendorId":"THE-VENDOR-ID",
                 "tenantId":"THE-TENANT-ID"
             }',
             200

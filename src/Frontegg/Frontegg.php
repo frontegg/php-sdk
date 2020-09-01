@@ -6,7 +6,7 @@ use Frontegg\Audits\AuditsClient;
 use Frontegg\Authenticator\Authenticator;
 use Frontegg\Config\Config;
 use Frontegg\Events\EventsClient;
-use Frontegg\Events\Type\TriggerOptionsInterface;
+use Frontegg\Events\Config\TriggerOptionsInterface;
 use Frontegg\Exception\AuthenticationException;
 use Frontegg\Exception\FronteggSDKException;
 use Frontegg\Exception\InvalidParameterException;
@@ -39,6 +39,11 @@ class Frontegg
      * @const string The name of the environment variable that contains the client secret key.
      */
     public const CLIENT_SECRET_ENV_NAME = 'FRONTEGG_CLIENT_SECRET_KEY';
+
+    /**
+     * @const string The name of the environment variable that contains the tenant ID.
+     */
+    public const TENANT_ID_ENV_NAME = 'FRONTEGG_TENANT_ID';
 
     /**
      * @const string Default API version for requests.
@@ -144,10 +149,8 @@ class Frontegg
         $this->proxy = new Proxy(
             $this->authenticator,
             new FronteggAdapter($this->client),
-            // @TODO: Refactor this to use context resolver.
             $this->config->getContextResolver()
         );
-        // @TODO: Instantiate Notifications, etc.
     }
 
     /**

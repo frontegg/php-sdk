@@ -1,0 +1,22 @@
+version: "3.1"
+
+services:
+    web:
+        image: nginx:alpine
+        volumes:
+            - ./:/app/docker
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        ports:
+            - 8080:80
+
+    app:
+        build:
+            context: ../
+            dockerfile: ./docker/php/Dockerfile
+        volumes:
+            - ../:/app
+            - ./php/php.ini:/usr/local/etc/php/php.ini
+        environment:
+            - FRONTEGG_CLIENT_ID=THE-CLIENT-ID
+            - FRONTEGG_CLIENT_SECRET_KEY=THE-API-KEY
+            - FRONTEGG_TENANT_ID=THE-TENANT-ID
