@@ -294,3 +294,43 @@ function handleFronteggUri(RequestInterface $request)
     return $response->getBody(); 
 }
 ````
+
+Another example of raw PHP and with adapting request parameters to Psr-7 Request object:
+
+````php
+<?php
+
+use Frontegg\Frontegg;
+use Psr\Http\Message\RequestInterface;
+use GuzzleHttp\Psr7\Request;
+
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+$requestUri = str_replace('/api/frontegg', '', $_SERVER['REQUEST_URI']);
+$httpHeaders = getallheaders();
+$body = http_build_query($requestMethod === 'GET' ? $_GET : $_POST);
+// Here you can see how to setup Psr-7 Request object.
+$adapterRequest = new Request($requestMethod, $requestUri, $httpHeaders, $body);
+
+$clientId = 'CLIENT_ID';
+$apikey = 'API_KEY';
+$tenantId = 'THE_TENANT_ID';
+$config = [
+    'clientId' => $clientId,
+    'clientSecret' => $apikey,
+    'apiBaseUrl' => 'https://api.test.com/',
+    'contextResolver' => function(RequestInterface $request) use ($tenantId) {
+        return [
+            'tenantId' => $tenantId,
+            'userId' => 'test-user-id',
+            'permissions' => [],
+        ];
+    },
+    'disableCors' => false,
+];
+
+$frontegg = new Frontegg($config);
+
+$response = $frontegg->forward($adapterRequest);
+
+print $response->getBody();
+````
