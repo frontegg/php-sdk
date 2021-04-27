@@ -5,11 +5,24 @@ on: [push]
 jobs:
     build-test:
         runs-on: ubuntu-latest
-        
+
+        strategy:
+          matrix:
+            php-versions: ['7.4', '8.0']
+        name: PHP ${{ matrix.php-versions }} Test
+
         steps:
-            - uses: actions/checkout@v2
-            - uses: php-actions/composer@v1
-            - name: PHPUnit Tests
-              uses: php-actions/phpunit@v9
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
               with:
-                  configuration: ./phpunit.xml
+                  php-version: ${{ matrix.php-versions }}
+                  tools: composer:v2, phpunit:v9
+
+            - name: Install Dependencies
+              run: composer install
+
+            - name: PHPUnit Tests
+              run: vendor/bin/phpunit
