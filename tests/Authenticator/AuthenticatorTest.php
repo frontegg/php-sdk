@@ -3,7 +3,9 @@
 namespace Frontegg\Tests\Authenticator;
 
 use DateTime;
+use Frontegg\HttpClient\FronteggCurlHttpClient;
 use Frontegg\Tests\Helper\AuthenticatorTestCaseHelper;
+use Prophecy\Argument;
 
 class AuthenticatorTest extends AuthenticatorTestCaseHelper
 {
@@ -167,5 +169,33 @@ class AuthenticatorTest extends AuthenticatorTestCaseHelper
             'Unauthorized',
             $authenticator->getApiError()->getError()
         );
+    }
+
+    public function testAuthenticatorCallsAuthUrl()
+    {
+        $authBaseUrl = 'http://authentication';
+
+        $client = $this->prophesize(FronteggCurlHttpClient::class);
+        $client->send(
+            Argument::containingString($authBaseUrl),
+            Argument::any(),
+            Argument::any(),
+            Argument::any(),
+            Argument::any()
+        )
+            ->shouldBeCalledOnce()
+            ->willReturn($this->createAuthHttpApiRawResponse());
+
+        $authenticator = $this->createFronteggAuthenticator(
+            $client->reveal(),
+            'clientTestID',
+            'apiTestSecretKey',
+            'http://test',
+            [],
+            true,
+            null,
+            $authBaseUrl
+        );
+        $authenticator->authenticate();
     }
 }

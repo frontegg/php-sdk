@@ -90,7 +90,7 @@ class Authenticator
      */
     public function authenticate(): void
     {
-        $url = $this->fronteggConfig->getServiceUrl(
+        $url = $this->fronteggConfig->getAuthenticationUrl(
             Config::AUTHENTICATION_SERVICE
         );
         $body = json_encode(
