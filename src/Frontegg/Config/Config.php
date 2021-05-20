@@ -54,6 +54,14 @@ class Config
     protected $baseUrl;
 
     /**
+     * Frontegg API base URL for authentication.
+     * In hybrid mode, the base API url and authentication url may be different
+     *
+     * @var string
+     */
+    protected $authenticationBaseUrl;
+
+    /**
      * Frontegg API endpoints relative URLs.
      *
      * @var array
@@ -79,6 +87,7 @@ class Config
      * @param array $urls
      * @param bool $disableCors
      * @param callable $contextResolver
+     * @param string $authenticationBaseUrl
      */
     public function __construct(
         string $clientId,
@@ -86,7 +95,8 @@ class Config
         string $baseUrl,
         array $urls,
         bool $disableCors,
-        callable $contextResolver
+        callable $contextResolver,
+        string $authenticationBaseUrl
     ) {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
@@ -94,6 +104,7 @@ class Config
         $this->setApiUrls($urls);
         $this->contextResolver = $contextResolver;
         $this->disableCors = $disableCors;
+        $this->authenticationBaseUrl = trim($authenticationBaseUrl, '/');
     }
 
     /**
@@ -137,6 +148,14 @@ class Config
     }
 
     /**
+     * @return string
+     */
+    public function getAuthenticationBaseUrl(): string
+    {
+        return $this->authenticationBaseUrl;
+    }
+
+    /**
      * Returns API URL by service name.
      *
      * @param string $urlKey
@@ -147,11 +166,7 @@ class Config
      */
     public function getServiceUrl(string $urlKey): string
     {
-        if (!isset(static::$API_URL_KEYS[$urlKey])) {
-            throw new InvalidUrlConfigException(
-                sprintf('URL "%s" is not a part of allowed API', $urlKey)
-            );
-        }
+        $this->validateUrlKey($urlKey);
 
         if (isset($this->urls[$urlKey])) {
             return $this->baseUrl . $this->urls[$urlKey];
@@ -159,6 +174,17 @@ class Config
 
         return $this->baseUrl . static::$API_URL_KEYS[$urlKey];
     }
+
+   public function getAuthenticationUrl(string $urlKey): string
+   {
+       $this->validateUrlKey($urlKey);
+
+       if (isset($this->urls[$urlKey])) {
+           return $this->authenticationBaseUrl . $this->urls[$urlKey];
+       }
+
+       return $this->authenticationBaseUrl . static::$API_URL_KEYS[$urlKey];
+   }
 
     /**
      * Returns URL of the Frontegg proxy.
@@ -187,6 +213,15 @@ class Config
             }
 
             $this->urls[$key] = $url;
+        }
+    }
+
+    private function validateUrlKey(string $urlKey): void
+    {
+        if (!isset(static::$API_URL_KEYS[$urlKey])) {
+            throw new InvalidUrlConfigException(
+                sprintf('URL "%s" is not a part of allowed API', $urlKey)
+            );
         }
     }
 }

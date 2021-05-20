@@ -23,7 +23,8 @@ class ConfigTest extends TestCase
             false,
             function (RequestInterface $request) {
                 return [];
-            }
+            },
+            'https://auth/'
         );
 
         // Assert
@@ -52,14 +53,16 @@ class ConfigTest extends TestCase
             false,
             function (RequestInterface $request) {
                 return [];
-            }
+            },
+            'https://auth/'
         );
 
         // Assert
         $this->assertEquals('https://api.frontegg.com', $config->getBaseUrl());
+        $this->assertEquals('https://auth', $config->getAuthenticationBaseUrl());
         $this->assertEquals(
-            'https://api.frontegg.com/test/auth',
-            $config->getServiceUrl(Config::AUTHENTICATION_SERVICE)
+            'https://auth/test/auth',
+            $config->getAuthenticationUrl(Config::AUTHENTICATION_SERVICE)
         );
         $this->assertEquals(
             'https://api.frontegg.com/audits',
@@ -96,18 +99,28 @@ class ConfigTest extends TestCase
             false,
             function (RequestInterface $request) {
                 return [];
-            }
+            },
+            'https://auth/'
         );
 
         // Assert
         $this->assertEquals(
-            $config->getBaseUrl() . Config::AUTHENTICATION_SERVICE_DEFAULT_URL,
-            $config->getServiceUrl(Config::AUTHENTICATION_SERVICE)
+            $config->getAuthenticationBaseUrl() . Config::AUTHENTICATION_SERVICE_DEFAULT_URL,
+            $config->getAuthenticationUrl(Config::AUTHENTICATION_SERVICE)
+        );
+        $this->assertEquals(
+            $config->getBaseUrl() . Config::EVENTS_SERVICE_DEFAULT_URL,
+            $config->getServiceUrl(Config::EVENTS_SERVICE)
         );
         $this->expectException(InvalidUrlConfigException::class);
         $this->assertNotEquals(
             'should not be in the config',
             $config->getServiceUrl('randomUrl')
+        );
+        $this->expectException(InvalidUrlConfigException::class);
+        $this->assertNotEquals(
+            'should not be in the config',
+            $config->getAuthenticationUrl('randomUrl')
         );
     }
 }

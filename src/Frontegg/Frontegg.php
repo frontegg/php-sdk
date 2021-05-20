@@ -102,6 +102,7 @@ class Frontegg
                 'clientId' => getenv(static::CLIENT_ID_ENV_NAME),
                 'clientSecret' => getenv(static::CLIENT_SECRET_ENV_NAME),
                 'apiBaseUrl' => static::DEFAULT_API_BASE_URL,
+                'authenticationBaseUrl' => static::DEFAULT_API_BASE_URL,
                 'apiUrls' => [],
                 'apiVersion' => static::DEFAULT_API_VERSION,
                 'httpClientHandler' => null,
@@ -138,7 +139,8 @@ class Frontegg
             $config['apiBaseUrl'],
             $config['apiUrls'],
             $config['disableCors'],
-            $config['contextResolver']
+            $config['contextResolver'],
+            $config['authenticationBaseUrl']
         );
         $this->client = $config['httpClientHandler'] ??
             new FronteggCurlHttpClient();
