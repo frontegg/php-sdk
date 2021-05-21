@@ -62,6 +62,7 @@ $config = [
     'clientId' => 'YOUR_CLIENT_ID',
     'clientSecret' => 'YOUR_SECRET_API_KEY',
     'apiBaseUrl' => 'https://api.frontegg.com/',
+    'authenticationBaseUrl' => 'https://api.frontegg.com/',
     'apiUrls' => [
         'authentication' => '/auth/vendor',
         'audits' => '/audits',
@@ -89,6 +90,7 @@ $frontegg->init();
 | **clientSecret**  | string | None | API Key. Required |
 | **contextResolver**   | callable | None | Callback to provide context info. Required |
 | apiBaseUrl        | string | https://api.frontegg.com | Base API URL |
+| authenticationBaseUrl | string | https://api.frontegg.com | Base URL used for authentication |
 | apiUrls           | array | [] | List of URLs of the API services |
 | disableCors       | bool | false | Disabling CORS headers for Middleware Proxy |
 | httpClientHandler | special interface* | Curl client** | Custom HTTP client |

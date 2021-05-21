@@ -49,6 +49,14 @@ class FronteggTest extends AuthenticatorTestCaseHelper
             'apiTestSecretKey',
             $frontegg->getConfig()->getClientSecret()
         );
+        $this->assertEquals(
+            Frontegg::DEFAULT_API_BASE_URL,
+            $frontegg->getConfig()->getBaseUrl()
+        );
+        $this->assertEquals(
+            Frontegg::DEFAULT_API_BASE_URL,
+            $frontegg->getConfig()->getAuthenticationBaseUrl()
+        );
         $this->assertInstanceOf(
             FronteggHttpClientInterface::class,
             $frontegg->getClient()

@@ -28,7 +28,8 @@ abstract class AuthenticatorTestCaseHelper extends TestCase
         string $baseUrl = 'http://test',
         array $urls = [],
         bool $disbaleCors = true,
-        ?callable $contextResolver = null
+        ?callable $contextResolver = null,
+        string $authenticationBaseUrl = 'http://auth'
     ): Authenticator {
         $contextResolver = $contextResolver ?? function () {
             return [];
@@ -39,7 +40,8 @@ abstract class AuthenticatorTestCaseHelper extends TestCase
             $baseUrl,
             $urls,
             $disbaleCors,
-            $contextResolver
+            $contextResolver,
+            $authenticationBaseUrl
         );
 
         return new Authenticator($fronteggConfig, $client);
